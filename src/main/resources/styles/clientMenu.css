@@ -1,0 +1,68 @@
+.sidebar_container {
+    -fx-background-color: linear-gradient(to bottom, #24243E 0%, #59599B 49%, #0F0C29 100%);
+    -fx-padding: 10;
+}
+
+.sidebar_logo_container {
+    -fx-alignment: center;
+}
+
+.sidebar_logo_container FontIcon {
+    -fx-fill: #FFFFFF;
+}
+
+.sidebar_logo_container Text {
+    -fx-font-size: 1.2em;
+    -fx-fill: #FFFFFF;
+    -fx-font-weight: bold;
+}
+
+.sidebar_divider {
+    -fx-stroke: white; /* Set color to white */
+    -fx-stroke-width: 1.5; /* Adjust thickness */
+    -fx-opacity: 0.6; /* Optional: Adjust transparency for a subtle effect */
+}
+
+.sidebar_btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-size: 1.1em;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-pref-height: 40;
+    -fx-padding: 5 10;
+    -fx-alignment: center-left;
+}
+
+.sidebar_btn FontIcon {
+    -fx-fill: white;
+    -fx-padding: 0 10 0 0;
+}
+
+.sidebar_btn:hover {
+    -fx-background-color: #59599B;
+    -fx-cursor: hand;
+}
+
+.sidebar_btn:pressed {
+    -fx-background-color: #0F0C29;
+}
+
+.report_bug_container {
+    -fx-alignment: center;
+    -fx-spacing: 5;
+}
+
+.report_bug_text {
+    -fx-font-size: 1.2em;
+    -fx-fill: white;
+    -fx-font-weight: bold;
+}
+
+.report_bug_label {
+    -fx-text-fill: white;
+    -fx-font-size: 1em;
+    -fx-wrap-text: true;
+    -fx-max-width: 120;
+    -fx-text-alignment: center;
+}
