@@ -8,15 +8,12 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox alignment="CENTER" spacing="10.0" styleClass="login_field_box" stylesheets="@../styles/login.css" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ashu.sah.SahPustakSadan.Front_end.Controller.LoginFormController">
+<VBox styleClass="login_field_box" stylesheets="@../styles/login.css" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ashu.sah.SahPustakSadan.Front_end.Controller.LoginFormController">
 
-    <Label id="label" text="Login As" />
-    <ChoiceBox fx:id="acc_selector" prefWidth="150.0" styleClass="account_selector" />
     <Label id="label" text="Username" />
     <TextField fx:id="username" styleClass="input_field" />
     <Label id="label" text="Password" />
     <PasswordField fx:id="password" styleClass="input_field" />
-    <Button fx:id="login_btn" mnemonicParsing="false" prefHeight="26.0" prefWidth="328.0" text="Login" />
+    <Button fx:id="login_btn" text="Login" />
     <Label fx:id="error" styleClass="error_lbl" />
-<!--    <Hyperlink onAction="#switchToSignUp" text="Don't have an account? Sign Up" />-->
 </VBox>

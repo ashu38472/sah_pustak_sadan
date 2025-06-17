@@ -13,8 +13,6 @@ import java.util.ResourceBundle;
 @Component
 public class LoginFormController implements Initializable {
     @FXML
-    public ChoiceBox<String> acc_selector;
-    @FXML
     public TextField username;
     @FXML
     public PasswordField password; // Use PasswordField for password input

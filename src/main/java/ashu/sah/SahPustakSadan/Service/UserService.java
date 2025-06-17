@@ -25,4 +25,20 @@ public class UserService {
         }
         return false;
     }
+
+    public boolean registerUser(String name, String email, String password) {
+        if (userRepository.findByEmail(email).isPresent()) {
+            return false; // User already exists
+        }
+
+        User user = new User();
+        user.setName(name);
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setRole(User.Role.valueOf("admin")); // default role
+
+        userRepository.save(user);
+        return true;
+    }
+
 }

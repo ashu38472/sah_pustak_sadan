@@ -6,8 +6,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.control.Hyperlink;
+import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,12 +25,13 @@ import java.util.ResourceBundle;
 
 @Component
 public class LoginViewController implements Initializable {
-
+    @FXML
+    public Label heading;
     @FXML
     private VBox logoContainer;
 
     @FXML
-    private HBox loginFieldContainer;
+    private VBox loginFieldContainer;
 
     @FXML
     private AnchorPane rootPane;
@@ -55,7 +57,7 @@ public class LoginViewController implements Initializable {
     private Text switchMessage;
 
     @FXML
-    private Button switchButton;
+    private Hyperlink switchButton;
 
     private boolean showingLogin = true;
 
@@ -65,8 +67,9 @@ public class LoginViewController implements Initializable {
         try {
             loginForm = loadForm(loginResource);
             signupForm = loadForm(signupResource);
-            loginFieldContainer.getChildren().add(0, loginForm);
-            switchMessage.setText("Don't have an account? Sign Up");
+            loginFieldContainer.getChildren().add(1, loginForm);
+            heading.setText("Sign In");
+            switchMessage.setText("Don't have an account?");
             switchButton.setText("Sign Up");
             showingLogin = true;
         } catch (IOException e) {
@@ -100,14 +103,16 @@ public class LoginViewController implements Initializable {
     }
 
     @FXML
-    private void handleSwitchAuthMode(ActionEvent event) {
+    public void handleSwitchAuthMode() {
         if (showingLogin) {
-            loginFieldContainer.getChildren().set(0, signupForm);
-            switchMessage.setText("Already have an account? Login");
+            loginFieldContainer.getChildren().set(1, signupForm);
+            heading.setText("Sign Up");
+            switchMessage.setText("Already have an account?");
             switchButton.setText("Login");
         } else {
-            loginFieldContainer.getChildren().set(0, loginForm);
-            switchMessage.setText("Don't have an account? Sign Up");
+            loginFieldContainer.getChildren().set(1, loginForm);
+            heading.setText("Sign In");
+            switchMessage.setText("Don't have an account?");
             switchButton.setText("Sign Up");
         }
         showingLogin = !showingLogin;
