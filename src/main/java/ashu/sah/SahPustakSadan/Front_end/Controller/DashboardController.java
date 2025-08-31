@@ -311,7 +311,7 @@ public class DashboardController implements Initializable {
         if (result.isPresent() && result.get() == ButtonType.OK) {
             try {
                 userSession.logout();
-                sceneManager.switchScene("classpath:/scenes/login.fxml", "Login - Sah Pustak Sadan", 835, 560);
+                sceneManager.switchScene("classpath:/scenes/login.fxml", "Login - Sah Pustak Sadan");
             } catch (IOException e) {
                 showErrorAlert("Error during logout", "Could not return to login screen.");
                 e.printStackTrace();
