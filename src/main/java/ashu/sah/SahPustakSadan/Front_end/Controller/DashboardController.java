@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -27,18 +26,15 @@ public class DashboardController implements Initializable {
 
     @FXML private BorderPane rootPane;
     @FXML private VBox sidebarContainer;
-    @FXML private VBox logoContainer;
-    @FXML private VBox buttonsContainer;
-    @FXML private VBox reportBugContainer;
     @FXML private VBox mainContentContainer;
     @FXML private HBox statsContainer;
-    @FXML private Text appNameLabel;
     @FXML private TableView<?> recentActivitiesTable;
     @FXML private Label statusLabel;
     @FXML private Label dateTimeLabel;
 
     @Autowired private SceneManager sceneManager;
     @Autowired private UserSession userSession;
+    @Autowired private SidebarController sidebarController;
 
     // Stats text fields
     private Text todaySalesText;
@@ -46,134 +42,41 @@ public class DashboardController implements Initializable {
     private Text lowStockText;
     private Text totalCustomersText;
 
-    // Button references
-    private final Map<String, Button> sidebarButtons = new HashMap<>();
-
-    // Button configuration
-    private final List<ButtonConfig> buttonConfigs = Arrays.asList(
-            new ButtonConfig("dashboard", "Dashboard", "fas-home", this::handleDashboard, true),
-            new ButtonConfig("invoice", "Invoice", "fas-file-invoice", this::handleInvoice,
-                    () -> userSession.canAccessInvoice()),
-            new ButtonConfig("productStock", "Product Stock", "fas-clipboard-list", this::handleProductStock,
-                    () -> userSession.canAccessProductStock()),
-            new ButtonConfig("priceCalc", "Price Calculator", "fas-calculator", this::handlePriceCalculator,
-                    () -> userSession.canAccessPriceCalculator()),
-            new ButtonConfig("profile", "Profile", "far-user-circle", this::handleProfile,
-                    () -> userSession.canAccessProfile()),
-            new ButtonConfig("logout", "Logout", "fas-sign-out-alt", this::handleLogout, true)
-    );
-
-    private static class ButtonConfig {
-        final String id;
-        final String text;
-        final String icon;
-        final Runnable action;
-        final java.util.function.Supplier<Boolean> visibilityCheck;
-
-        ButtonConfig(String id, String text, String icon, Runnable action, boolean alwaysVisible) {
-            this(id, text, icon, action, () -> alwaysVisible);
-        }
-
-        ButtonConfig(String id, String text, String icon, Runnable action,
-                     java.util.function.Supplier<Boolean> visibilityCheck) {
-            this.id = id;
-            this.text = text;
-            this.icon = icon;
-            this.action = action;
-            this.visibilityCheck = visibilityCheck;
-        }
-    }
-
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         setupResponsiveLayout();
-        loadAppName();
-        createSidebarButtons();
+
+        // Use SidebarController to create the sidebar
+        VBox sidebar = sidebarController.createSidebar(rootPane, this::handleNavigation);
+        sidebarContainer.getChildren().setAll(sidebar.getChildren());
+
         createStatsCards();
         startClock();
         loadDashboardData();
-        setActiveButton("dashboard");
+        sidebarController.setActiveButton("dashboard");
         statusLabel.setText("Dashboard loaded successfully");
     }
 
+    private void handleNavigation(String buttonId) {
+        switch (buttonId) {
+            case "dashboard" -> handleDashboard();
+            case "invoice" -> handleInvoice();
+            case "productStock" -> handleProductStock();
+            case "priceCalc" -> handlePriceCalculator();
+            case "profile" -> handleProfile();
+            case "logout" -> handleLogout();
+            case "reportBug" -> handleReportBug();
+        }
+    }
+
     private void setupResponsiveLayout() {
-        // Make sidebar responsive - 30% width with 10px padding
+        // Make sidebar responsive - 30% width
         sidebarContainer.prefWidthProperty().bind(rootPane.widthProperty().multiply(0.20));
         sidebarContainer.setPrefHeight(Region.USE_COMPUTED_SIZE);
         sidebarContainer.setMaxHeight(Double.MAX_VALUE);
 
         // Main content takes remaining space
         mainContentContainer.prefWidthProperty().bind(rootPane.widthProperty().multiply(0.80));
-
-        // Sidebar internal spacing and sizing
-        VBox.setVgrow(buttonsContainer, Priority.ALWAYS);
-        VBox.setVgrow(reportBugContainer, Priority.NEVER);
-
-        // Logo container sizing
-        logoContainer.setPrefHeight(80);
-        logoContainer.setMaxHeight(80);
-        logoContainer.setMinHeight(80);
-    }
-
-    private void loadAppName() {
-        Properties properties = new Properties();
-        try (InputStream input = getClass().getResourceAsStream("/application.properties")) {
-            if (input != null) {
-                properties.load(input);
-                String appName = properties.getProperty("spring.application.name", "Sah Pustak Sadan");
-                appNameLabel.setText(appName);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void createSidebarButtons() {
-        buttonsContainer.getChildren().clear();
-        sidebarButtons.clear();
-
-        // Add spacing at the top
-        Region topSpacer = new Region();
-        topSpacer.setPrefHeight(20);
-        buttonsContainer.getChildren().add(topSpacer);
-
-        for (ButtonConfig config : buttonConfigs) {
-            if (config.visibilityCheck.get()) {
-                Button button = createSidebarButton(config);
-                sidebarButtons.put(config.id, button);
-                buttonsContainer.getChildren().add(button);
-
-                // Add some spacing between buttons
-                Region spacer = new Region();
-                spacer.setPrefHeight(5);
-                buttonsContainer.getChildren().add(spacer);
-            }
-        }
-
-        // Add flexible space to push report bug section to bottom
-        Region flexibleSpace = new Region();
-        VBox.setVgrow(flexibleSpace, Priority.ALWAYS);
-        buttonsContainer.getChildren().add(flexibleSpace);
-    }
-
-    private Button createSidebarButton(ButtonConfig config) {
-        Button button = new Button(config.text);
-        button.setId(config.id + "Btn");
-
-        // Create icon
-        FontIcon icon = new FontIcon(config.icon);
-        icon.setIconSize(20);
-        button.setGraphic(icon);
-
-        // Styling
-        button.getStyleClass().add("sidebar_btn");
-        button.setMaxWidth(Double.MAX_VALUE);
-        button.setPrefHeight(45);
-
-        // Set action
-        button.setOnAction(e -> config.action.run());
-
-        return button;
     }
 
     private void createStatsCards() {
@@ -225,18 +128,6 @@ public class DashboardController implements Initializable {
         return card;
     }
 
-    private void setActiveButton(String buttonId) {
-        // Remove active class from all buttons
-        sidebarButtons.values().forEach(button ->
-                button.getStyleClass().remove("sidebar_btn_active"));
-
-        // Add active class to specified button
-        Button activeButton = sidebarButtons.get(buttonId);
-        if (activeButton != null) {
-            activeButton.getStyleClass().add("sidebar_btn_active");
-        }
-    }
-
     private void startClock() {
         Timeline clock = new Timeline(new KeyFrame(Duration.ZERO, e -> {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
@@ -257,12 +148,12 @@ public class DashboardController implements Initializable {
 
     // Button handlers
     private void handleDashboard() {
-        setActiveButton("dashboard");
+        sidebarController.setActiveButton("dashboard");
         statusLabel.setText("Dashboard selected");
     }
 
     private void handleInvoice() {
-        setActiveButton("invoice");
+        sidebarController.setActiveButton("invoice");
         try {
             statusLabel.setText("Opening invoice...");
             showComingSoonAlert("Invoice Management");
@@ -272,7 +163,7 @@ public class DashboardController implements Initializable {
     }
 
     private void handleProductStock() {
-        setActiveButton("productStock");
+        sidebarController.setActiveButton("productStock");
         try {
             statusLabel.setText("Opening product stock...");
             showComingSoonAlert("Product Stock Management");
@@ -282,7 +173,7 @@ public class DashboardController implements Initializable {
     }
 
     private void handlePriceCalculator() {
-        setActiveButton("priceCalc");
+        sidebarController.setActiveButton("priceCalc");
         try {
             statusLabel.setText("Opening price calculator...");
             showComingSoonAlert("Price Calculator");
@@ -292,7 +183,7 @@ public class DashboardController implements Initializable {
     }
 
     private void handleProfile() {
-        setActiveButton("profile");
+        sidebarController.setActiveButton("profile");
         try {
             statusLabel.setText("Opening profile...");
             showComingSoonAlert("User Profile");
@@ -329,7 +220,16 @@ public class DashboardController implements Initializable {
         }
     }
 
-    // Public methods for navigation (called from FXML if needed)
+    // Public methods for external access
+    public void refreshSidebar() {
+        sidebarController.refreshSidebar();
+    }
+
+    public void setActiveTab(String tabId) {
+        sidebarController.setActiveButton(tabId);
+    }
+
+    // FXML action handlers (if needed for backward compatibility)
     public void handleDashboard(ActionEvent event) { handleDashboard(); }
     public void handleInvoice(ActionEvent event) { handleInvoice(); }
     public void handleProductStock(ActionEvent event) { handleProductStock(); }
@@ -353,10 +253,5 @@ public class DashboardController implements Initializable {
         alert.setContentText(message);
         alert.showAndWait();
         statusLabel.setText("Error occurred");
-    }
-
-    // Method to refresh sidebar based on user permissions
-    public void refreshSidebar() {
-        createSidebarButtons();
     }
 }

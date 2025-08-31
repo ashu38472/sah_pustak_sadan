@@ -15,26 +15,7 @@
     <!-- Left Sidebar - Will be populated programmatically -->
     <left>
         <VBox fx:id="sidebarContainer" styleClass="sidebar_container">
-            <!-- Logo and App Name -->
-            <VBox fx:id="logoContainer" styleClass="sidebar_logo_container">
-                <FontIcon iconLiteral="fas-store-alt" iconSize="30" />
-                <Text fx:id="appNameLabel" text="Sah Pustak Sadan" />
-            </VBox>
-
-            <!-- Buttons will be added programmatically -->
-            <VBox fx:id="buttonsContainer" styleClass="sidebar_buttons_container">
-            </VBox>
-
-            <!-- Report Bug Section -->
-            <VBox fx:id="reportBugContainer" styleClass="report_bug_container">
-                <Text styleClass="report_bug_text" text="Report Bugs?" />
-                <Label styleClass="report_bug_label" text="Use this to report any error or suggestion" wrapText="true" />
-                <Button fx:id="reportBtn" styleClass="sidebar_btn" text="Report" onAction="#handleReportBug">
-                    <graphic>
-                        <FontIcon iconLiteral="fas-bug" iconSize="20" />
-                    </graphic>
-                </Button>
-            </VBox>
+            <!-- Sidebar content will be created by SidebarController -->
         </VBox>
     </left>
 

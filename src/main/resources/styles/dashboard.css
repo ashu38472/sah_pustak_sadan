@@ -12,8 +12,8 @@
 }
 
 .sidebar_logo_container {
-    -fx-alignment: center;
-    -fx-spacing: 5;
+    -fx-alignment: center-left;
+    -fx-spacing: 10;
     -fx-padding: 0 0 10 0;
 }
 
@@ -21,11 +21,10 @@
     -fx-fill: #FFFFFF;
 }
 
-.sidebar_logo_container Text {
+.sidebar_logo_text {
     -fx-font-size: 1.2em;
     -fx-fill: #FFFFFF;
     -fx-font-weight: bold;
-    -fx-text-alignment: center;
 }
 
 .sidebar_buttons_container {
@@ -41,15 +40,18 @@
     -fx-background-radius: 8;
     -fx-pref-height: 45;
     -fx-padding: 8 15;
-    -fx-alignment: center-left;
-    -fx-graphic-text-gap: 12;
     -fx-cursor: hand;
     -fx-max-width: infinity;
     -fx-min-width: 0;
 }
 
-.sidebar_btn FontIcon {
+.sidebar_btn_icon {
     -fx-fill: white;
+}
+
+.sidebar_btn_text {
+    -fx-fill: white;
+    -fx-font-size: 1.0em;
 }
 
 .sidebar_btn:hover {
@@ -286,17 +288,14 @@
 
     .sidebar_btn {
         -fx-padding: 8;
-        -fx-alignment: center;
-        -fx-graphic-text-gap: 0;
-        -fx-font-size: 0;
         -fx-pref-height: 50;
     }
 
-    .sidebar_btn Text {
+    .sidebar_btn_text {
         -fx-font-size: 0;
     }
 
-    .sidebar_logo_container Text {
+    .sidebar_logo_text {
         -fx-font-size: 0;
     }
 
