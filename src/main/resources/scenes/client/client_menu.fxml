@@ -8,49 +8,44 @@
 <?import javafx.scene.text.Text?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="750.0" prefWidth="180.0"
-      xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1"
-      stylesheets="@../../styles/clientMenu.css"
-      fx:controller="ashu.sah.SahPustakSadan.Front_end.Controller.Client.ClientMenuController"
-      styleClass="sidebar_container">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="750.0" prefWidth="180.0" styleClass="sidebar_container" stylesheets="@../../styles/clientMenu.css" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ashu.sah.SahPustakSadan.Front_end.Controller.Client.ClientMenuController">
 
     <AnchorPane prefHeight="730.0" prefWidth="160.0">
         <!-- Logo and App Name -->
-        <VBox layoutX="10.0" prefHeight="80.0" prefWidth="160.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"
-              styleClass="sidebar_logo_container">
+        <VBox layoutX="10.0" prefHeight="80.0" prefWidth="160.0" styleClass="sidebar_logo_container" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <FontIcon iconLiteral="fas-store-alt" iconSize="30" />
             <Text fx:id="appNameLabel" text="Sah Pustak Sadan" />
         </VBox>
 
         <!-- Sidebar Buttons -->
         <VBox layoutY="80.0" prefHeight="400.0" prefWidth="160.0" AnchorPane.topAnchor="100.0">
-            <Button fx:id="dashboard_btn" text="Dashboard" styleClass="sidebar_btn">
+            <Button fx:id="dashboard_btn" prefWidth="156.0" styleClass="sidebar_btn" text="Dashboard">
                 <graphic>
                     <FontIcon iconLiteral="fas-home" iconSize="20" />
                 </graphic>
             </Button>
-            <Button fx:id="invoice_btn" text="Invoice" styleClass="sidebar_btn">
+            <Button fx:id="invoice_btn" prefWidth="158.0" styleClass="sidebar_btn" text="Invoice">
                 <graphic>
                     <FontIcon iconLiteral="fas-file-invoice" iconSize="20" />
                 </graphic>
             </Button>
-            <Button fx:id="product_stock_btn" text="Product Stock" styleClass="sidebar_btn">
+            <Button fx:id="product_stock_btn" styleClass="sidebar_btn" text="Product Stock">
                 <graphic>
                     <FontIcon iconLiteral="fas-clipboard-list" iconSize="20" />
                 </graphic>
             </Button>
-            <Button fx:id="price_calc_btn" text="Price Calculator" styleClass="sidebar_btn">
+            <Button fx:id="price_calc_btn" prefWidth="157.0" styleClass="sidebar_btn" text="Price Calculator">
                 <graphic>
                     <FontIcon iconLiteral="fas-calculator" iconSize="20" />
                 </graphic>
             </Button>
             <Line endX="160.0" layoutY="175.0" styleClass="sidebar_divider" />
-            <Button fx:id="profile_btn" text="Profile" styleClass="sidebar_btn">
+            <Button fx:id="profile_btn" prefWidth="155.0" styleClass="sidebar_btn" text="Profile">
                 <graphic>
                     <FontIcon iconLiteral="far-user-circle" iconSize="20" />
                 </graphic>
             </Button>
-            <Button fx:id="logout_btn" text="Logout" styleClass="sidebar_btn">
+            <Button fx:id="logout_btn" styleClass="sidebar_btn" text="Logout">
                 <graphic>
                     <FontIcon iconLiteral="fas-sign-out-alt" iconSize="20" />
                 </graphic>
@@ -58,13 +53,12 @@
         </VBox>
 
         <!-- Report Bug Section -->
-        <VBox layoutX="14.0" layoutY="558.0" prefHeight="120.0" prefWidth="130.0" AnchorPane.bottomAnchor="0.0"
-              styleClass="report_bug_container">
-            <Text text="Report Bugs?" styleClass="report_bug_text"/>
-            <Label text="Use this to report any error or suggestion" wrapText="true" styleClass="report_bug_label"/>
-            <Button fx:id="report_btn" text="Report" styleClass="sidebar_btn">
+        <VBox layoutX="14.0" layoutY="558.0" prefHeight="120.0" prefWidth="130.0" styleClass="report_bug_container" AnchorPane.bottomAnchor="0.0">
+            <Text styleClass="report_bug_text" text="Report Bugs?" />
+            <Label styleClass="report_bug_label" text="Use this to report any error or suggestion" wrapText="true" />
+            <Button fx:id="report_btn" styleClass="sidebar_btn" text="Report">
                 <graphic>
-                    <FontIcon iconLiteral="fas-bug" iconSize="20"/>
+                    <FontIcon iconLiteral="fas-bug" iconSize="20" />
                 </graphic>
             </Button>
         </VBox>

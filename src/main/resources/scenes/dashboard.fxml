@@ -12,110 +12,43 @@
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="ashu.sah.SahPustakSadan.Front_end.Controller.DashboardController">
 
-    <!-- Top Menu Bar -->
-    <top>
-        <MenuBar styleClass="menu_bar">
-            <Menu text="File">
-                <MenuItem text="New Sale" />
-                <MenuItem text="New Purchase" />
-                <SeparatorMenuItem />
-                <MenuItem text="Exit" onAction="#handleExit" />
-            </Menu>
-            <Menu text="Inventory">
-                <MenuItem text="View Products" />
-                <MenuItem text="Add Product" />
-                <MenuItem text="Categories" />
-            </Menu>
-            <Menu text="Reports">
-                <MenuItem text="Sales Report" />
-                <MenuItem text="Inventory Report" />
-                <MenuItem text="Financial Report" />
-            </Menu>
-            <Menu text="Help">
-                <MenuItem text="About" />
-            </Menu>
-        </MenuBar>
-    </top>
-
-    <!-- Left Sidebar -->
+    <!-- Left Sidebar - Will be populated programmatically -->
     <left>
-        <VBox styleClass="sidebar" prefWidth="200.0">
-            <Label text="Quick Actions" styleClass="sidebar_header" />
+        <VBox fx:id="sidebarContainer" styleClass="sidebar_container">
+            <!-- Logo and App Name -->
+            <VBox fx:id="logoContainer" styleClass="sidebar_logo_container">
+                <FontIcon iconLiteral="fas-store-alt" iconSize="30" />
+                <Text fx:id="appNameLabel" text="Sah Pustak Sadan" />
+            </VBox>
 
-            <Button fx:id="newSaleBtn" text="New Sale" styleClass="sidebar_button" onAction="#handleNewSale">
-                <graphic>
-                    <FontIcon iconLiteral="fas-cash-register" iconSize="16" />
-                </graphic>
-            </Button>
+            <!-- Buttons will be added programmatically -->
+            <VBox fx:id="buttonsContainer" styleClass="sidebar_buttons_container">
+            </VBox>
 
-            <Button fx:id="viewInventoryBtn" text="View Inventory" styleClass="sidebar_button" onAction="#handleViewInventory">
-                <graphic>
-                    <FontIcon iconLiteral="fas-boxes" iconSize="16" />
-                </graphic>
-            </Button>
-
-            <Button fx:id="addProductBtn" text="Add Product" styleClass="sidebar_button" onAction="#handleAddProduct">
-                <graphic>
-                    <FontIcon iconLiteral="fas-plus" iconSize="16" />
-                </graphic>
-            </Button>
-
-            <Button fx:id="reportsBtn" text="Reports" styleClass="sidebar_button" onAction="#handleReports">
-                <graphic>
-                    <FontIcon iconLiteral="fas-chart-bar" iconSize="16" />
-                </graphic>
-            </Button>
-
-            <Button fx:id="settingsBtn" text="Settings" styleClass="sidebar_button" onAction="#handleSettings">
-                <graphic>
-                    <FontIcon iconLiteral="fas-cog" iconSize="16" />
-                </graphic>
-            </Button>
-
-            <!-- Spacer to push logout to bottom -->
-            <Region VBox.vgrow="ALWAYS" />
-
-            <Button fx:id="logoutBtn" text="Logout" styleClass="logout_button" onAction="#handleLogout">
-                <graphic>
-                    <FontIcon iconLiteral="fas-sign-out-alt" iconSize="16" />
-                </graphic>
-            </Button>
+            <!-- Report Bug Section -->
+            <VBox fx:id="reportBugContainer" styleClass="report_bug_container">
+                <Text styleClass="report_bug_text" text="Report Bugs?" />
+                <Label styleClass="report_bug_label" text="Use this to report any error or suggestion" wrapText="true" />
+                <Button fx:id="reportBtn" styleClass="sidebar_btn" text="Report" onAction="#handleReportBug">
+                    <graphic>
+                        <FontIcon iconLiteral="fas-bug" iconSize="20" />
+                    </graphic>
+                </Button>
+            </VBox>
         </VBox>
     </left>
 
     <!-- Main Content Area -->
     <center>
-        <VBox styleClass="main_content" spacing="20">
+        <VBox fx:id="mainContentContainer" styleClass="main_content" spacing="20">
             <HBox styleClass="header_box" alignment="CENTER_LEFT">
                 <FontIcon iconLiteral="fas-tachometer-alt" iconSize="24" />
                 <Text text="Dashboard" styleClass="page_title" />
             </HBox>
 
             <!-- Dashboard Stats -->
-            <HBox spacing="20" styleClass="stats_container">
-                <VBox styleClass="stat_card">
-                    <FontIcon iconLiteral="fas-dollar-sign" iconSize="32" styleClass="stat_icon" />
-                    <Text text="Today's Sales" styleClass="stat_label" />
-                    <Text fx:id="todaySalesText" text="₹0.00" styleClass="stat_value" />
-                </VBox>
-
-                <VBox styleClass="stat_card">
-                    <FontIcon iconLiteral="fas-shopping-cart" iconSize="32" styleClass="stat_icon" />
-                    <Text text="Total Products" styleClass="stat_label" />
-                    <Text fx:id="totalProductsText" text="0" styleClass="stat_value" />
-                </VBox>
-
-                <VBox styleClass="stat_card">
-                    <FontIcon iconLiteral="fas-exclamation-triangle" iconSize="32" styleClass="stat_icon" />
-                    <Text text="Low Stock Items" styleClass="stat_label" />
-                    <Text fx:id="lowStockText" text="0" styleClass="stat_value" />
-                </VBox>
-
-                <VBox styleClass="stat_card">
-                    <FontIcon iconLiteral="fas-users" iconSize="32" styleClass="stat_icon" />
-                    <Text text="Total Customers" styleClass="stat_label" />
-                    <Text fx:id="totalCustomersText" text="0" styleClass="stat_value" />
-                </VBox>
+            <HBox fx:id="statsContainer" spacing="20" styleClass="stats_container">
+                <!-- Stats cards will be populated programmatically -->
             </HBox>
 
             <!-- Recent Activities -->

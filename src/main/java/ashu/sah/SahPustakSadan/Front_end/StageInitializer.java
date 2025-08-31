@@ -1,7 +1,7 @@
 package ashu.sah.SahPustakSadan.Front_end;
 
 import ashu.sah.SahPustakSadan.Front_end.IndexApplication.StageReadyEvent;
-import ashu.sah.SahPustakSadan.Front_end.Service.SceneManager;
+import ashu.sah.SahPustakSadan.Front_end.Stage.SceneManager;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
