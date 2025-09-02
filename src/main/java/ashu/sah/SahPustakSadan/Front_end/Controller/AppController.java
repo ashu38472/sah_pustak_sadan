@@ -2,7 +2,6 @@ package ashu.sah.SahPustakSadan.Front_end.Controller;
 
 import ashu.sah.SahPustakSadan.Front_end.Stage.SceneManager;
 import ashu.sah.SahPustakSadan.Service.UserSession;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -203,7 +202,6 @@ public class AppController implements Initializable {
                 sceneManager.switchScene("classpath:/scenes/login.fxml", "Login - Sah Pustak Sadan");
             } catch (IOException e) {
                 showErrorAlert("Error during logout", "Could not return to login screen.");
-                e.printStackTrace();
             }
         }
     }
@@ -217,23 +215,6 @@ public class AppController implements Initializable {
             showErrorAlert("Error opening bug report", e.getMessage());
         }
     }
-
-    // Public methods for external access
-    public void refreshSidebar() {
-        sidebarController.refreshSidebar();
-    }
-
-    public void setActiveTab(String tabId) {
-        sidebarController.setActiveButton(tabId);
-    }
-
-    // FXML action handlers (if needed for backward compatibility)
-    public void handleDashboard(ActionEvent event) { handleDashboard(); }
-    public void handleInvoice(ActionEvent event) { handleInvoice(); }
-    public void handleProductStock(ActionEvent event) { handleProductStock(); }
-    public void handlePriceCalculator(ActionEvent event) { handlePriceCalculator(); }
-    public void handleProfile(ActionEvent event) { handleProfile(); }
-    public void handleReportBug(ActionEvent event) { handleReportBug(); }
 
     private void showComingSoonAlert(String feature) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
