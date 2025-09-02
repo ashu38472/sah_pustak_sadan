@@ -22,7 +22,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Component
-public class DashboardController implements Initializable {
+public class AppController implements Initializable {
 
     @FXML private BorderPane rootPane;
     @FXML private VBox sidebarContainer;
@@ -57,6 +57,22 @@ public class DashboardController implements Initializable {
         statusLabel.setText("Dashboard loaded successfully");
     }
 
+    private void setupResponsiveLayout() {
+        sidebarContainer.prefWidthProperty().bind(rootPane.widthProperty().multiply(0.20));
+        sidebarContainer.setPrefHeight(Region.USE_COMPUTED_SIZE);
+        sidebarContainer.setMaxHeight(Double.MAX_VALUE);
+
+        mainContentContainer.prefWidthProperty().bind(rootPane.widthProperty().multiply(0.80));
+
+        // CRITICAL FIX: Bind max height to prevent status bar from being pushed out
+        mainContentContainer.maxHeightProperty().bind(
+                rootPane.heightProperty().subtract(50) // Reserve 50px for status bar
+        );
+
+        // Ensure proper layout behavior
+        VBox.setVgrow(mainContentContainer, Priority.SOMETIMES);
+    }
+
     private void handleNavigation(String buttonId) {
         switch (buttonId) {
             case "dashboard" -> handleDashboard();
@@ -67,16 +83,6 @@ public class DashboardController implements Initializable {
             case "logout" -> handleLogout();
             case "reportBug" -> handleReportBug();
         }
-    }
-
-    private void setupResponsiveLayout() {
-        // Make sidebar responsive - 30% width
-        sidebarContainer.prefWidthProperty().bind(rootPane.widthProperty().multiply(0.20));
-        sidebarContainer.setPrefHeight(Region.USE_COMPUTED_SIZE);
-        sidebarContainer.setMaxHeight(Double.MAX_VALUE);
-
-        // Main content takes remaining space
-        mainContentContainer.prefWidthProperty().bind(rootPane.widthProperty().multiply(0.80));
     }
 
     private void createStatsCards() {

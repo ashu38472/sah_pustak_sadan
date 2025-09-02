@@ -69,7 +69,7 @@ public class LoginFormController implements Initializable {
                 userSession.login(userId, email, userName, role);
 
                 // Switch to dashboard scene
-                sceneManager.switchScene("classpath:/scenes/dashboard.fxml", "Dashboard - Sah Pustak Sadan");
+                sceneManager.switchScene("classpath:/scenes/app.fxml", "Dashboard - Sah Pustak Sadan");
 
             } else {
                 showError("Invalid username or password.");

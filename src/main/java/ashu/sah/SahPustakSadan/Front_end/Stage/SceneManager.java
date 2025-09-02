@@ -71,7 +71,7 @@ public class SceneManager {
 
     /**
      * Switch to a new scene by loading the FXML file while preserving stage state
-     * @param fxmlPath The path to the FXML file (e.g., "classpath:/scenes/dashboard.fxml")
+     * @param fxmlPath The path to the FXML file (e.g., "classpath:/scenes/app.fxml")
      * @param title The title for the new scene (optional, can be null)
      * @param width The width of the new scene (optional, 0 to keep current width)
      * @param height The height of the new scene (optional, 0 to keep current height)

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<BorderPane fx:id="rootPane" prefHeight="600.0" prefWidth="900.0"
+            styleClass="dashboard_container"
+            stylesheets="@../styles/app.css"
+            xmlns="http://javafx.com/javafx/18"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="ashu.sah.SahPustakSadan.Front_end.Controller.AppController">
+
+    <!-- Left Sidebar -->
+    <left>
+        <VBox fx:id="sidebarContainer" styleClass="sidebar_container">
+            <!-- Sidebar content will be created by SidebarController -->
+        </VBox>
+    </left>
+
+    <!-- Main Content Area wrapped in ScrollPane -->
+    <center>
+        <ScrollPane fitToWidth="true" fitToHeight="true"
+                    hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+            <VBox fx:id="mainContentContainer" styleClass="main_content" spacing="20">
+                <HBox styleClass="header_box" alignment="CENTER_LEFT">
+                    <FontIcon iconLiteral="fas-tachometer-alt" iconSize="24" />
+                    <Text text="Dashboard" styleClass="page_title" />
+                </HBox>
+
+                <!-- Dashboard Stats -->
+                <HBox fx:id="statsContainer" spacing="20" styleClass="stats_container">
+                    <!-- Stats cards will be populated programmatically -->
+                </HBox>
+
+                <!-- Recent Activities -->
+                <VBox styleClass="content_section">
+                    <Text text="Recent Activities" styleClass="section_title" />
+                    <TableView fx:id="recentActivitiesTable" styleClass="activities_table"
+                               prefHeight="200" maxHeight="300">
+                        <columns>
+                            <TableColumn text="Time" prefWidth="120" />
+                            <TableColumn text="Type" prefWidth="100" />
+                            <TableColumn text="Description" prefWidth="300" />
+                            <TableColumn text="Amount" prefWidth="100" />
+                        </columns>
+                    </TableView>
+                </VBox>
+            </VBox>
+        </ScrollPane>
+    </center>
+
+    <!-- Bottom Status Bar with fixed height -->
+    <bottom>
+        <HBox styleClass="status_bar" alignment="CENTER_LEFT" spacing="20"
+              minHeight="35" prefHeight="35" maxHeight="35">
+            <Label fx:id="statusLabel" text="Ready" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Label fx:id="dateTimeLabel" text="" />
+        </HBox>
+    </bottom>
+
+</BorderPane>
