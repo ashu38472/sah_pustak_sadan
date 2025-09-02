@@ -63,14 +63,6 @@ public class AppController implements Initializable {
         sidebarContainer.setMaxHeight(Double.MAX_VALUE);
 
         mainContentContainer.prefWidthProperty().bind(rootPane.widthProperty().multiply(0.80));
-
-        // CRITICAL FIX: Bind max height to prevent status bar from being pushed out
-        mainContentContainer.maxHeightProperty().bind(
-                rootPane.heightProperty().subtract(50) // Reserve 50px for status bar
-        );
-
-        // Ensure proper layout behavior
-        VBox.setVgrow(mainContentContainer, Priority.SOMETIMES);
     }
 
     private void handleNavigation(String buttonId) {
