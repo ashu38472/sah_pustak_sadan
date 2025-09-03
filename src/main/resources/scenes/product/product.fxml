@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<?import java.lang.String?>
+<ScrollPane fitToWidth="true" fitToHeight="true"
+            hbarPolicy="NEVER"
+            xmlns="http://javafx.com/javafx/18"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="ashu.sah.SahPustakSadan.Front_end.Controller.Product.ProductController">
+
+    <VBox fx:id="mainContentContainer" styleClass="main_content" spacing="20">
+
+        <!-- Product Management Header -->
+        <HBox styleClass="header_box" alignment="CENTER_LEFT" spacing="15">
+            <FontIcon iconLiteral="fas-shopping-cart" iconSize="24" />
+            <Text text="Product Management" styleClass="page_title" />
+
+            <!-- Header Actions -->
+            <Region HBox.hgrow="ALWAYS" />
+
+            <Button fx:id="addProductBtn" text="Add Product"
+                    styleClass="primary_btn" onAction="#handleAddProduct">
+                <graphic>
+                    <FontIcon iconLiteral="fas-plus" iconSize="14" />
+                </graphic>
+            </Button>
+
+            <Button fx:id="refreshBtn" text="Refresh"
+                    styleClass="secondary_btn" onAction="#handleRefresh">
+                <graphic>
+                    <FontIcon iconLiteral="fas-sync" iconSize="14" />
+                </graphic>
+            </Button>
+        </HBox>
+
+        <!-- Search and Filter Section -->
+        <VBox styleClass="filter_section" spacing="15">
+            <HBox alignment="CENTER_LEFT" spacing="15">
+                <!-- Search Box -->
+                <HBox alignment="CENTER_LEFT" spacing="10" styleClass="search_box">
+                    <FontIcon iconLiteral="fas-search" iconSize="16" styleClass="search_icon" />
+                    <TextField fx:id="searchField" promptText="Search products by name, code, or category..."
+                               styleClass="search_field" prefWidth="300" onKeyReleased="#handleSearch" />
+                </HBox>
+
+                <!-- Category Filter -->
+                <ComboBox fx:id="categoryFilter" promptText="All Categories"
+                          styleClass="filter_combo" prefWidth="180" onAction="#handleCategoryFilter" />
+
+                <!-- Status Filter -->
+                <ComboBox fx:id="statusFilter" promptText="All Status"
+                          styleClass="filter_combo" prefWidth="120" onAction="#handleStatusFilter" />
+
+
+                <!-- Clear Filters -->
+                <Button fx:id="clearFiltersBtn" text="Clear"
+                        styleClass="clear_filters_btn" onAction="#handleClearFilters" />
+            </HBox>
+        </VBox>
+
+        <!-- Products Table Section -->
+        <VBox styleClass="table_section" VBox.vgrow="ALWAYS">
+            <HBox alignment="CENTER_LEFT" spacing="10" styleClass="table_header">
+                <Text text="Products" styleClass="table_title" />
+                <Label fx:id="productCountLabel" text="(0 products)" styleClass="count_label" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Label fx:id="statusLabel" text="Ready" styleClass="status_label" />
+            </HBox>
+
+            <!-- Products Table -->
+            <TableView fx:id="productsTable" styleClass="data_table" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="codeColumn" text="Code" prefWidth="100" />
+                    <TableColumn fx:id="nameColumn" text="Product Name" prefWidth="200" />
+                    <TableColumn fx:id="categoryColumn" text="Category" prefWidth="120" />
+                    <TableColumn fx:id="unitColumn" text="Unit"/>
+                    <TableColumn fx:id="basePriceColumn" text="Base Price" prefWidth="100" />
+                    <TableColumn fx:id="costPriceColumn" text="Cost Price" prefWidth="100" />
+                    <TableColumn fx:id="stockColumn" text="Stock"/>
+                    <TableColumn fx:id="minStockColumn" text="Min Stock"/>
+                    <TableColumn fx:id="statusColumn" text="Status"/>
+                    <TableColumn fx:id="actionsColumn" text="Actions" prefWidth="120" />
+                </columns>
+                <placeholder>
+                    <VBox alignment="CENTER" spacing="10">
+                        <FontIcon iconLiteral="fas-box" iconSize="48" styleClass="placeholder_icon" />
+                        <Label text="No products found" styleClass="placeholder_text" />
+                        <Button text="Add First Product" styleClass="primary_btn"
+                                onAction="#handleAddProduct" />
+                    </VBox>
+                </placeholder>
+            </TableView>
+        </VBox>
+
+    </VBox>
+
+</ScrollPane>

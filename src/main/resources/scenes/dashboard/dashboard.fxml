@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<ScrollPane fitToWidth="true" fitToHeight="true"
+            hbarPolicy="NEVER"
+            xmlns="http://javafx.com/javafx/18"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="ashu.sah.SahPustakSadan.Front_end.Controller.Dashboard.DashboardController">
+
+    <VBox fx:id="mainContentContainer" styleClass="main_content" spacing="20">
+
+        <!-- Dashboard Header -->
+        <HBox styleClass="header_box" alignment="CENTER_LEFT">
+            <FontIcon iconLiteral="fas-tachometer-alt" iconSize="24" />
+            <Text text="Dashboard" styleClass="page_title" />
+        </HBox>
+
+        <!-- Dashboard Stats -->
+        <HBox fx:id="statsContainer" spacing="20" styleClass="stats_container">
+            <!-- Stats cards will be populated programmatically -->
+        </HBox>
+
+        <!-- Quick Actions Section -->
+        <VBox styleClass="content_section">
+            <Text text="Quick Actions" styleClass="section_title" />
+            <HBox fx:id="quickActionsContainer" spacing="15" styleClass="quick_actions_container">
+                <Button fx:id="createInvoiceBtn" text="Create Invoice"
+                            styleClass="quick_action_btn" onAction="#handleCreateInvoice">
+                    <graphic>
+                        <FontIcon iconLiteral="fas-plus-circle" iconSize="16" />
+                    </graphic>
+                </Button>
+
+                <Button fx:id="addProductBtn" text="Add Product"
+                        styleClass="quick_action_btn" onAction="#handleAddProduct">
+                    <graphic>
+                        <FontIcon iconLiteral="fas-shopping-cart" iconSize="16" />
+                    </graphic>
+                </Button>
+
+                <Button fx:id="viewInventoryBtn" text="View Inventory"
+                        styleClass="quick_action_btn" onAction="#handleViewInventory">
+                    <graphic>
+                        <FontIcon iconLiteral="fas-warehouse" iconSize="16" />
+                    </graphic>
+                </Button>
+
+                <Button fx:id="addCustomerBtn" text="Add Customer"
+                        styleClass="quick_action_btn" onAction="#handleAddCustomer">
+                    <graphic>
+                        <FontIcon iconLiteral="fas-user-plus" iconSize="16" />
+                    </graphic>
+                </Button>
+            </HBox>
+        </VBox>
+
+        <!-- Recent Activities -->
+        <VBox styleClass="content_section">
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Text text="Recent Activities" styleClass="section_title" />
+                <Button fx:id="refreshActivitiesBtn" text="Refresh"
+                        styleClass="refresh_btn" onAction="#handleRefreshActivities">
+                    <graphic>
+                        <FontIcon iconLiteral="fas-sync" iconSize="12" />
+                    </graphic>
+                </Button>
+            </HBox>
+
+            <TableView fx:id="recentActivitiesTable" styleClass="activities_table"
+                       prefHeight="200" maxHeight="300">
+                <columns>
+                    <TableColumn fx:id="timeColumn" text="Time" prefWidth="120" />
+                    <TableColumn fx:id="typeColumn" text="Type" prefWidth="100" />
+                    <TableColumn fx:id="descriptionColumn" text="Description" prefWidth="300" />
+                    <TableColumn fx:id="amountColumn" text="Amount" prefWidth="100" />
+                    <TableColumn fx:id="userColumn" text="User" prefWidth="100" />
+                </columns>
+                <placeholder>
+                    <Label text="No recent activities found" styleClass="table_placeholder" />
+                </placeholder>
+            </TableView>
+        </VBox>
+
+        <!-- Low Stock Alerts -->
+        <VBox fx:id="lowStockSection" styleClass="content_section">
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Text text="Low Stock Alerts" styleClass="section_title" />
+                <Label fx:id="lowStockCountLabel" text="0" styleClass="alert_count_label" />
+            </HBox>
+
+            <TableView fx:id="lowStockTable" styleClass="low_stock_table"
+                       prefHeight="150" maxHeight="200">
+                <columns>
+                    <TableColumn fx:id="productNameColumn" text="Product" prefWidth="200" />
+                    <TableColumn fx:id="categoryColumn" text="Category" prefWidth="120" />
+                    <TableColumn fx:id="currentStockColumn" text="Current Stock" prefWidth="100" />
+                    <TableColumn fx:id="minStockColumn" text="Min Stock" prefWidth="100" />
+                    <TableColumn fx:id="stockActionColumn" text="Action" prefWidth="100" />
+                </columns>
+                <placeholder>
+                    <Label text="No low stock items" styleClass="table_placeholder" />
+                </placeholder>
+            </TableView>
+        </VBox>
+
+    </VBox>
+
+</ScrollPane>

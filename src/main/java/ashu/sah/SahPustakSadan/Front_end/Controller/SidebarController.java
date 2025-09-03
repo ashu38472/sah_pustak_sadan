@@ -28,6 +28,7 @@ public class SidebarController {
     // Button configuration
     private final List<ButtonConfig> buttonConfigs = Arrays.asList(
             new ButtonConfig("dashboard", "Dashboard", "fas-home", true),
+            new ButtonConfig("product", "Product", "fas-clipboard-list", true),
             new ButtonConfig("invoice", "Invoice", "fas-file-invoice",
                     () -> userSession.canAccessInvoice()),
             new ButtonConfig("productStock", "Product Stock", "fas-clipboard-list",
@@ -64,20 +65,11 @@ public class SidebarController {
         sidebarContainer = new VBox();
         sidebarContainer.getStyleClass().add("sidebar_container");
 
-        setupResponsiveLayout(rootPane);
         createLogoSection();
         createButtonsSection();
         createReportBugSection();
 
         return sidebarContainer;
-    }
-
-    private void setupResponsiveLayout(BorderPane rootPane) {
-        // Sidebar takes 30% width with proper height
-        sidebarContainer.prefWidthProperty().bind(rootPane.widthProperty().multiply(0.30));
-        sidebarContainer.setPrefHeight(Region.USE_COMPUTED_SIZE);
-        sidebarContainer.setMaxHeight(Double.MAX_VALUE);
-        sidebarContainer.setMinHeight(600);
     }
 
     private void createLogoSection() {

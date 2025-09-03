@@ -1,16 +1,20 @@
 package ashu.sah.SahPustakSadan.Front_end.Controller;
 
+import ashu.sah.SahPustakSadan.Front_end.Controller.Dashboard.DashboardController;
+import ashu.sah.SahPustakSadan.Front_end.Controller.Product.ProductController;
 import ashu.sah.SahPustakSadan.Front_end.Stage.SceneManager;
 import ashu.sah.SahPustakSadan.Service.UserSession;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import javafx.animation.Timeline;
 import javafx.animation.KeyFrame;
 import javafx.util.Duration;
-import org.kordamp.ikonli.javafx.FontIcon;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,9 +29,6 @@ public class AppController implements Initializable {
 
     @FXML private BorderPane rootPane;
     @FXML private VBox sidebarContainer;
-    @FXML private VBox mainContentContainer;
-    @FXML private HBox statsContainer;
-    @FXML private TableView<?> recentActivitiesTable;
     @FXML private Label statusLabel;
     @FXML private Label dateTimeLabel;
 
@@ -35,40 +36,42 @@ public class AppController implements Initializable {
     @Autowired private UserSession userSession;
     @Autowired private SidebarController sidebarController;
 
-    // Stats text fields
-    private Text todaySalesText;
-    private Text totalProductsText;
-    private Text lowStockText;
-    private Text totalCustomersText;
+    // Getter methods for accessing controllers from other components
+    // Controllers for different sections
+    @Getter
+    private DashboardController dashboardController;
+    @Getter
+    private ProductController productController;
+
+    // Current loaded content
+    private Node currentContent;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         setupResponsiveLayout();
-
-        // Use SidebarController to create the sidebar
-        VBox sidebar = sidebarController.createSidebar(rootPane, this::handleNavigation);
-        sidebarContainer.getChildren().setAll(sidebar.getChildren());
-
-        createStatsCards();
+        setupSidebar();
         startClock();
-        loadDashboardData();
+        loadDashboard(); // Load dashboard by default
         sidebarController.setActiveButton("dashboard");
-        statusLabel.setText("Dashboard loaded successfully");
+        statusLabel.setText("Application loaded successfully");
     }
 
     private void setupResponsiveLayout() {
         sidebarContainer.prefWidthProperty().bind(rootPane.widthProperty().multiply(0.20));
         sidebarContainer.setPrefHeight(Region.USE_COMPUTED_SIZE);
         sidebarContainer.setMaxHeight(Double.MAX_VALUE);
+    }
 
-        mainContentContainer.prefWidthProperty().bind(rootPane.widthProperty().multiply(0.80));
+    private void setupSidebar() {
+        VBox sidebar = sidebarController.createSidebar(rootPane, this::handleNavigation);
+        sidebarContainer.getChildren().setAll(sidebar.getChildren());
     }
 
     private void handleNavigation(String buttonId) {
         switch (buttonId) {
             case "dashboard" -> handleDashboard();
             case "invoice" -> handleInvoice();
-            case "productStock" -> handleProductStock();
+            case "product" -> handleProduct();
             case "priceCalc" -> handlePriceCalculator();
             case "profile" -> handleProfile();
             case "logout" -> handleLogout();
@@ -76,97 +79,27 @@ public class AppController implements Initializable {
         }
     }
 
-    private void createStatsCards() {
-        statsContainer.getChildren().clear();
-
-        // Today's Sales
-        VBox salesCard = createStatCard("fas-dollar-sign", "Today's Sales", "₹0.00");
-        todaySalesText = (Text) salesCard.getChildren().get(2);
-
-        // Total Products
-        VBox productsCard = createStatCard("fas-shopping-cart", "Total Products", "0");
-        totalProductsText = (Text) productsCard.getChildren().get(2);
-
-        // Low Stock Items
-        VBox lowStockCard = createStatCard("fas-exclamation-triangle", "Low Stock Items", "0");
-        lowStockText = (Text) lowStockCard.getChildren().get(2);
-
-        // Total Customers
-        VBox customersCard = createStatCard("fas-users", "Total Customers", "0");
-        totalCustomersText = (Text) customersCard.getChildren().get(2);
-
-        statsContainer.getChildren().addAll(salesCard, productsCard, lowStockCard, customersCard);
-
-        // Make stats container responsive
-        for (javafx.scene.Node card : statsContainer.getChildren()) {
-            HBox.setHgrow(card, Priority.ALWAYS);
-        }
-    }
-
-    private VBox createStatCard(String iconName, String label, String value) {
-        VBox card = new VBox();
-        card.getStyleClass().add("stat_card");
-        card.setSpacing(10);
-
-        // Icon
-        FontIcon icon = new FontIcon(iconName);
-        icon.setIconSize(32);
-        icon.getStyleClass().add("stat_icon");
-
-        // Label
-        Text labelText = new Text(label);
-        labelText.getStyleClass().add("stat_label");
-
-        // Value
-        Text valueText = new Text(value);
-        valueText.getStyleClass().add("stat_value");
-
-        card.getChildren().addAll(icon, labelText, valueText);
-        return card;
-    }
-
-    private void startClock() {
-        Timeline clock = new Timeline(new KeyFrame(Duration.ZERO, e -> {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
-            dateTimeLabel.setText(LocalDateTime.now().format(formatter));
-        }), new KeyFrame(Duration.seconds(1)));
-        clock.setCycleCount(Timeline.INDEFINITE);
-        clock.play();
-    }
-
-    private void loadDashboardData() {
-        // TODO: Load actual data from your services
-        // For now, setting some sample data
-        todaySalesText.setText("₹2,450.00");
-        totalProductsText.setText("156");
-        lowStockText.setText("8");
-        totalCustomersText.setText("45");
-    }
-
-    // Button handlers
     private void handleDashboard() {
         sidebarController.setActiveButton("dashboard");
-        statusLabel.setText("Dashboard selected");
+        loadDashboard();
+        statusLabel.setText("Dashboard loaded");
     }
 
     private void handleInvoice() {
         sidebarController.setActiveButton("invoice");
         try {
-            statusLabel.setText("Opening invoice...");
+            statusLabel.setText("Opening invoice management...");
             showComingSoonAlert("Invoice Management");
         } catch (Exception e) {
             showErrorAlert("Error opening invoice screen", e.getMessage());
         }
     }
 
-    private void handleProductStock() {
+    private void handleProduct() {
         sidebarController.setActiveButton("productStock");
-        try {
-            statusLabel.setText("Opening product stock...");
-            showComingSoonAlert("Product Stock Management");
-        } catch (Exception e) {
-            showErrorAlert("Error opening product stock screen", e.getMessage());
-        }
+        System.out.println("handle func");
+        loadProductManagement();
+        statusLabel.setText("Product management loaded");
     }
 
     private void handlePriceCalculator() {
@@ -216,6 +149,67 @@ public class AppController implements Initializable {
         }
     }
 
+    private void loadDashboard() {
+        try {
+            statusLabel.setText("Loading dashboard...");
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/scenes/dashboard/dashboard.fxml"));
+            Node dashboardContent = loader.load();
+            dashboardController = loader.getController();
+
+            setMainContent(dashboardContent);
+            statusLabel.setText("Dashboard loaded successfully");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showErrorAlert("Error loading dashboard", e.getMessage());
+            statusLabel.setText("Failed to load dashboard");
+        }
+    }
+
+    private void loadProductManagement() {
+        try {
+            statusLabel.setText("Loading product management...");
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/scenes/product/product.fxml"));
+            Node productContent = loader.load();
+            productController = loader.getController();
+            System.out.println("test");
+
+            setMainContent(productContent);
+            statusLabel.setText("Product management loaded successfully");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showErrorAlert("Error loading product management", e.getMessage());
+            statusLabel.setText("Failed to load product management");
+        }
+    }
+
+    private void setMainContent(Node content) {
+        if (currentContent != null) {
+            rootPane.getChildren().remove(currentContent);
+        }
+
+        rootPane.setCenter(content);
+        currentContent = content;
+
+        // Ensure proper sizing
+        if (content instanceof Region) {
+            Region region = (Region) content;
+            region.prefWidthProperty().bind(rootPane.widthProperty().multiply(0.80));
+        }
+    }
+
+    private void startClock() {
+        Timeline clock = new Timeline(new KeyFrame(Duration.ZERO, e -> {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+            dateTimeLabel.setText(LocalDateTime.now().format(formatter));
+        }), new KeyFrame(Duration.seconds(1)));
+        clock.setCycleCount(Timeline.INDEFINITE);
+        clock.play();
+    }
+
     private void showComingSoonAlert(String feature) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Coming Soon");
@@ -233,4 +227,5 @@ public class AppController implements Initializable {
         alert.showAndWait();
         statusLabel.setText("Error occurred");
     }
+
 }

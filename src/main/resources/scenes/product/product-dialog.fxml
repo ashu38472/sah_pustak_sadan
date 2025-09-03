@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<?import java.lang.String?>
+<VBox xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="ashu.sah.SahPustakSadan.Front_end.Controller.Product.ProductDialogController"
+      styleClass="dialog_container" spacing="20" prefWidth="500" prefHeight="600">
+
+    <!-- Dialog Header -->
+    <HBox styleClass="dialog_header" alignment="CENTER_LEFT" spacing="15">
+        <FontIcon iconLiteral="fas-shopping-cart" iconSize="24" />
+        <Text fx:id="dialogTitle" text="Add Product" styleClass="dialog_title" />
+    </HBox>
+
+    <!-- Form Content -->
+    <ScrollPane fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
+        <VBox spacing="20" styleClass="dialog_form">
+
+            <!-- Basic Information -->
+            <VBox spacing="15" styleClass="form_section">
+                <Text text="Basic Information" styleClass="section_header" />
+
+                <GridPane hgap="15" vgap="15" styleClass="form_grid">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="120" prefWidth="120" />
+                        <ColumnConstraints hgrow="ALWAYS" />
+                    </columnConstraints>
+
+                    <!-- Product Code -->
+                    <Label text="Product Code *" GridPane.columnIndex="0" GridPane.rowIndex="0"
+                           styleClass="form_label" />
+                    <TextField fx:id="codeField" GridPane.columnIndex="1" GridPane.rowIndex="0"
+                               styleClass="form_field" promptText="Enter product code" />
+
+                    <!-- Product Name -->
+                    <Label text="Product Name *" GridPane.columnIndex="0" GridPane.rowIndex="1"
+                           styleClass="form_label" />
+                    <TextField fx:id="nameField" GridPane.columnIndex="1" GridPane.rowIndex="1"
+                               styleClass="form_field" promptText="Enter product name" />
+
+                    <!-- Category -->
+                    <Label text="Category *" GridPane.columnIndex="0" GridPane.rowIndex="2"
+                           styleClass="form_label" />
+                    <ComboBox fx:id="categoryCombo" GridPane.columnIndex="1" GridPane.rowIndex="2"
+                              styleClass="form_field" promptText="Select category" maxWidth="Infinity" />
+
+                    <!-- Unit -->
+                    <Label text="Unit *" GridPane.columnIndex="0" GridPane.rowIndex="3"
+                           styleClass="form_label" />
+                    <ComboBox fx:id="unitCombo" GridPane.columnIndex="1" GridPane.rowIndex="3"
+                              styleClass="form_field" promptText="Select unit" maxWidth="Infinity">
+                        <items>
+                            <String value="Piece">Piece</String>
+                            <String value="Kg">Kg</String>
+                            <String value="Liter">Liter</String>
+                            <String value="Meter">Meter</String>
+                            <String value="Box">Box</String>
+                            <String value="Pack">Pack</String>
+                        </items>
+                    </ComboBox>
+
+                    <!-- Barcode -->
+                    <Label text="Barcode" GridPane.columnIndex="0" GridPane.rowIndex="4"
+                           styleClass="form_label" />
+                    <TextField fx:id="barcodeField" GridPane.columnIndex="1" GridPane.rowIndex="4"
+                               styleClass="form_field" promptText="Enter barcode (optional)" />
+                </GridPane>
+            </VBox>
+
+            <!-- Pricing Information -->
+            <VBox spacing="15" styleClass="form_section">
+                <Text text="Pricing Information" styleClass="section_header" />
+
+                <GridPane hgap="15" vgap="15" styleClass="form_grid">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="120" prefWidth="120" />
+                        <ColumnConstraints hgrow="ALWAYS" />
+                    </columnConstraints>
+
+                    <!-- Cost Price -->
+                    <Label text="Cost Price *" GridPane.columnIndex="0" GridPane.rowIndex="0"
+                           styleClass="form_label" />
+                    <TextField fx:id="costPriceField" GridPane.columnIndex="1" GridPane.rowIndex="0"
+                               styleClass="form_field" promptText="0.00" />
+
+                    <!-- Base Price -->
+                    <Label text="Base Price *" GridPane.columnIndex="0" GridPane.rowIndex="1"
+                           styleClass="form_label" />
+                    <TextField fx:id="basePriceField" GridPane.columnIndex="1" GridPane.rowIndex="1"
+                               styleClass="form_field" promptText="0.00" />
+
+                    <!-- Tax Percentage -->
+                    <Label text="Tax %" GridPane.columnIndex="0" GridPane.rowIndex="2"
+                           styleClass="form_label" />
+                    <TextField fx:id="taxPercentageField" GridPane.columnIndex="1" GridPane.rowIndex="2"
+                               styleClass="form_field" promptText="0.00" text="0.00" />
+                </GridPane>
+
+                <!-- Profit Calculation Display -->
+                <HBox spacing="10" styleClass="calculation_display">
+                    <Label text="Profit Margin:" styleClass="calc_label" />
+                    <Label fx:id="profitMarginLabel" text="₹0.00 (0%)" styleClass="calc_value" />
+                </HBox>
+            </VBox>
+
+            <!-- Inventory Information -->
+            <VBox spacing="15" styleClass="form_section">
+                <Text text="Inventory Information" styleClass="section_header" />
+
+                <GridPane hgap="15" vgap="15" styleClass="form_grid">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="120" prefWidth="120" />
+                        <ColumnConstraints hgrow="ALWAYS" />
+                    </columnConstraints>
+
+                    <!-- Minimum Stock Level -->
+                    <Label text="Min Stock Level *" GridPane.columnIndex="0" GridPane.rowIndex="0"
+                           styleClass="form_label" />
+                    <TextField fx:id="minStockField" GridPane.columnIndex="1" GridPane.rowIndex="0"
+                               styleClass="form_field" promptText="0" text="0" />
+
+                    <!-- Initial Stock -->
+                    <Label text="Initial Stock" GridPane.columnIndex="0" GridPane.rowIndex="1"
+                           styleClass="form_label" />
+                    <TextField fx:id="initialStockField" GridPane.columnIndex="1" GridPane.rowIndex="1"
+                               styleClass="form_field" promptText="0" text="0" />
+
+                    <!-- Status -->
+                    <Label text="Status" GridPane.columnIndex="0" GridPane.rowIndex="2"
+                           styleClass="form_label" />
+                    <CheckBox fx:id="activeCheckBox" text="Active" GridPane.columnIndex="1" GridPane.rowIndex="2"
+                              styleClass="form_checkbox" selected="true" />
+                </GridPane>
+            </VBox>
+
+            <!-- Description -->
+            <VBox spacing="10" styleClass="form_section">
+                <Label text="Description" styleClass="form_label" />
+                <TextArea fx:id="descriptionArea" styleClass="form_field"
+                          promptText="Enter product description (optional)"
+                          prefRowCount="3" wrapText="true" />
+            </VBox>
+
+        </VBox>
+    </ScrollPane>
+
+    <!-- Dialog Footer -->
+    <HBox styleClass="dialog_footer" spacing="10" alignment="CENTER_RIGHT">
+        <Button fx:id="cancelButton" text="Cancel" styleClass="secondary_btn"
+                onAction="#handleCancel" prefWidth="80" />
+        <Button fx:id="saveButton" text="Save" styleClass="primary_btn"
+                onAction="#handleSave" prefWidth="80" />
+    </HBox>
+
+</VBox>

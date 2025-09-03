@@ -12,9 +12,7 @@
 }
 
 .sidebar_logo_container {
-    -fx-alignment: center-left;
-    -fx-spacing: 10;
-    -fx-padding: 0 0 10 0;
+    -fx-alignment: center;
 }
 
 .sidebar_logo_container FontIcon {
@@ -28,7 +26,6 @@
 }
 
 .sidebar_buttons_container {
-    -fx-spacing: 0;
     -fx-alignment: TOP_CENTER;
 }
 
