@@ -2,12 +2,14 @@ package ashu.sah.SahPustakSadan.Model;
 
 import ashu.sah.SahPustakSadan.enums.UserRole;
 import jakarta.persistence.*;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.*;
 
 import java.time.LocalDateTime;
 
@@ -19,7 +21,9 @@ import java.time.LocalDateTime;
         @Index(name = "idx_user_role", columnList = "role"),
         @Index(name = "idx_user_active", columnList = "is_active")
 })
-@Where(clause = "deleted_at IS NULL")
+@SQLDelete(sql = "UPDATE users SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
+@FilterDef(name = "activeUserFilter", parameters = @ParamDef(name = "isActive", type = Boolean.class))
+@Filter(name = "activeUserFilter", condition = "deleted_at IS NULL")
 public class User extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

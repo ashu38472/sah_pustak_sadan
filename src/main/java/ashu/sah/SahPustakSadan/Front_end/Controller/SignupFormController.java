@@ -1,6 +1,6 @@
 package ashu.sah.SahPustakSadan.Front_end.Controller;
 
-import ashu.sah.SahPustakSadan.Controller.SignUpController;
+import ashu.sah.SahPustakSadan.APIController.SignUpController;
 import javafx.animation.PauseTransition;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;

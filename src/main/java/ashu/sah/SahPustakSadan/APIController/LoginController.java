@@ -1,15 +1,17 @@
-package ashu.sah.SahPustakSadan.Controller;
+package ashu.sah.SahPustakSadan.APIController;
 
 import ashu.sah.SahPustakSadan.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 @Controller
-public class SignUpController {
+public class LoginController {
+
     @Autowired
     private UserService userService;
 
-    public boolean register(String name, String email, String password) {
-        return userService.registerUser(name, email, password);
+    public boolean authenticate(String email, String password) {
+        System.out.println(email);
+        return userService.authenticate(email, password);
     }
 }

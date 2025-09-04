@@ -1,10 +1,9 @@
 package ashu.sah.SahPustakSadan.Front_end.Controller.Product;
 
+import ashu.sah.SahPustakSadan.APIController.product.ProductAPIController;
 import ashu.sah.SahPustakSadan.Front_end.Stage.SceneManager;
+import ashu.sah.SahPustakSadan.Front_end.Types.ProductDTO;
 import ashu.sah.SahPustakSadan.Model.Category;
-import ashu.sah.SahPustakSadan.Model.Product;
-//import ashu.sah.SahPustakSadan.Service.CategoryService;
-//import ashu.sah.SahPustakSadan.Service.ProductService;
 import ashu.sah.SahPustakSadan.Service.UserSession;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -12,6 +11,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -30,10 +30,9 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.List;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Component
 public class ProductController implements Initializable {
@@ -42,30 +41,26 @@ public class ProductController implements Initializable {
     @FXML private TextField searchField;
     @FXML private ComboBox<String> categoryFilter;
     @FXML private ComboBox<String> statusFilter;
-    @FXML private TableView<ProductRowData> productsTable;
-    @FXML private TableColumn<ProductRowData, String> codeColumn;
-    @FXML private TableColumn<ProductRowData, String> nameColumn;
-    @FXML private TableColumn<ProductRowData, String> categoryColumn;
-    @FXML private TableColumn<ProductRowData, String> unitColumn;
-    @FXML private TableColumn<ProductRowData, Double> basePriceColumn;
-    @FXML private TableColumn<ProductRowData, Double> costPriceColumn;
-    @FXML private TableColumn<ProductRowData, Integer> stockColumn;
-    @FXML private TableColumn<ProductRowData, Integer> minStockColumn;
-    @FXML private TableColumn<ProductRowData, String> statusColumn;
-    @FXML private TableColumn<ProductRowData, Void> actionsColumn;
+    @FXML private TableView<ProductDTO> productsTable;
+    @FXML private TableColumn<ProductDTO, String> codeColumn;
+    @FXML private TableColumn<ProductDTO, String> nameColumn;
+    @FXML private TableColumn<ProductDTO, String> categoryColumn;
+    @FXML private TableColumn<ProductDTO, String> unitColumn;
+    @FXML private TableColumn<ProductDTO, Double> basePriceColumn;
+    @FXML private TableColumn<ProductDTO, Double> costPriceColumn;
+    @FXML private TableColumn<ProductDTO, Integer> stockColumn;
+    @FXML private TableColumn<ProductDTO, Integer> minStockColumn;
+    @FXML private TableColumn<ProductDTO, String> statusColumn;
+    @FXML private TableColumn<ProductDTO, Void> actionsColumn;
     @FXML private Label productCountLabel;
     @FXML private Label statusLabel;
-    @FXML private Button addProductBtn;
-    @FXML private Button refreshBtn;
-    @FXML private Button clearFiltersBtn;
 
     @Autowired private SceneManager sceneManager;
     @Autowired private UserSession userSession;
-//    @Autowired private ProductService productService;
-//    @Autowired private CategoryService categoryService;
+    @Autowired private ProductAPIController productAPIController;
 
-    private final ObservableList<ProductRowData> allProducts = FXCollections.observableArrayList();
-    private FilteredList<ProductRowData> filteredProducts;
+    private final ObservableList<ProductDTO> allProducts = FXCollections.observableArrayList();
+    private FilteredList<ProductDTO> filteredProducts;
     private List<Category> categories;
 
     @Override
@@ -77,8 +72,8 @@ public class ProductController implements Initializable {
         loadData();
     }
 
+    // ---------------- Setup Table ----------------
     private void setupTable() {
-        // Setup table columns
         codeColumn.setCellValueFactory(new PropertyValueFactory<>("code"));
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         categoryColumn.setCellValueFactory(new PropertyValueFactory<>("categoryName"));
@@ -87,35 +82,34 @@ public class ProductController implements Initializable {
         costPriceColumn.setCellValueFactory(new PropertyValueFactory<>("costPrice"));
         stockColumn.setCellValueFactory(new PropertyValueFactory<>("currentStock"));
         minStockColumn.setCellValueFactory(new PropertyValueFactory<>("minStockLevel"));
-        statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 
-        // Format price columns
-        basePriceColumn.setCellFactory(column -> new TableCell<ProductRowData, Double>() {
+        statusColumn.setCellValueFactory(cellData -> {
+            ProductDTO product = cellData.getValue();
+            return new SimpleStringProperty(product.getIsActive() ? "Active" : "Inactive");
+        });
+
+        setupPriceColumn(basePriceColumn);
+        setupPriceColumn(costPriceColumn);
+        setupStatusColumn();
+        setupStockColumn();
+        setupActionsColumn();
+
+        filteredProducts = new FilteredList<>(allProducts);
+        productsTable.setItems(filteredProducts);
+    }
+
+    private void setupPriceColumn(TableColumn<ProductDTO, Double> column) {
+        column.setCellFactory(col -> new TableCell<ProductDTO, Double>() {
             @Override
             protected void updateItem(Double item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                } else {
-                    setText(String.format("₹%.2f", item));
-                }
+                setText(empty || item == null ? null : String.format("₹%.2f", item));
             }
         });
+    }
 
-        costPriceColumn.setCellFactory(column -> new TableCell<ProductRowData, Double>() {
-            @Override
-            protected void updateItem(Double item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                } else {
-                    setText(String.format("₹%.2f", item));
-                }
-            }
-        });
-
-        // Format status column with colored badges
-        statusColumn.setCellFactory(column -> new TableCell<ProductRowData, String>() {
+    private void setupStatusColumn() {
+        statusColumn.setCellFactory(col -> new TableCell<ProductDTO, String>() {
             @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
@@ -125,18 +119,19 @@ public class ProductController implements Initializable {
                 } else {
                     setText(item);
                     if ("Active".equals(item)) {
-                        setStyle("-fx-background-color: #d4edda; -fx-text-fill: #155724; " +
-                                "-fx-background-radius: 4px; -fx-padding: 2 8 2 8;");
+                        setStyle("-fx-background-color: #d4edda; -fx-text-fill: #155724; "
+                                + "-fx-background-radius: 4px; -fx-padding: 2 8 2 8;");
                     } else {
-                        setStyle("-fx-background-color: #f8d7da; -fx-text-fill: #721c24; " +
-                                "-fx-background-radius: 4px; -fx-padding: 2 8 2 8;");
+                        setStyle("-fx-background-color: #f8d7da; -fx-text-fill: #721c24; "
+                                + "-fx-background-radius: 4px; -fx-padding: 2 8 2 8;");
                     }
                 }
             }
         });
+    }
 
-        // Format stock column with warning colors for low stock
-        stockColumn.setCellFactory(column -> new TableCell<ProductRowData, Integer>() {
+    private void setupStockColumn() {
+        stockColumn.setCellFactory(col -> new TableCell<ProductDTO, Integer>() {
             @Override
             protected void updateItem(Integer item, boolean empty) {
                 super.updateItem(item, empty);
@@ -145,8 +140,9 @@ public class ProductController implements Initializable {
                     setStyle("");
                 } else {
                     setText(String.valueOf(item));
-                    ProductRowData rowData = getTableView().getItems().get(getIndex());
-                    if (item <= rowData.getMinStockLevel()) {
+                    ProductDTO product = getTableView().getItems().get(getIndex());
+                    if (product.getCurrentStock() != null && product.getMinStockLevel() != null
+                            && product.getCurrentStock() <= product.getMinStockLevel()) {
                         setStyle("-fx-text-fill: #dc3545; -fx-font-weight: bold;");
                     } else {
                         setStyle("-fx-text-fill: #28a745;");
@@ -154,79 +150,37 @@ public class ProductController implements Initializable {
                 }
             }
         });
-
-        // Setup actions column
-        setupActionsColumn();
-
-        // Setup filtered list
-        filteredProducts = new FilteredList<>(allProducts);
-        productsTable.setItems(filteredProducts);
     }
 
     private void setupActionsColumn() {
-        actionsColumn.setCellFactory(new Callback<TableColumn<ProductRowData, Void>, TableCell<ProductRowData, Void>>() {
+        actionsColumn.setCellFactory(col -> new TableCell<ProductDTO, Void>() {
+            private final HBox actionsBox = new HBox(5);
+            private final Button viewBtn = new Button();
+            private final Button editBtn = new Button();
+            private final Button deleteBtn = new Button();
+
+            {
+                viewBtn.setGraphic(new FontIcon("fas-eye"));
+                editBtn.setGraphic(new FontIcon("fas-edit"));
+                deleteBtn.setGraphic(new FontIcon("fas-trash"));
+                actionsBox.getChildren().addAll(viewBtn, editBtn, deleteBtn);
+
+                viewBtn.setOnAction(e -> handleViewProduct(getTableView().getItems().get(getIndex())));
+                editBtn.setOnAction(e -> handleEditProduct(getTableView().getItems().get(getIndex())));
+                deleteBtn.setOnAction(e -> handleDeleteProduct(getTableView().getItems().get(getIndex())));
+            }
+
             @Override
-            public TableCell<ProductRowData, Void> call(TableColumn<ProductRowData, Void> param) {
-                return new TableCell<ProductRowData, Void>() {
-                    private final HBox actionsBox = new HBox(5);
-                    private final Button viewBtn = new Button();
-                    private final Button editBtn = new Button();
-                    private final Button deleteBtn = new Button();
-
-                    {
-                        // Setup buttons
-                        viewBtn.setGraphic(new FontIcon("fas-eye"));
-                        viewBtn.getStyleClass().addAll("action_btn", "view_btn");
-                        viewBtn.setTooltip(new Tooltip("View Details"));
-
-                        editBtn.setGraphic(new FontIcon("fas-edit"));
-                        editBtn.getStyleClass().addAll("action_btn", "edit_btn");
-                        editBtn.setTooltip(new Tooltip("Edit Product"));
-
-                        deleteBtn.setGraphic(new FontIcon("fas-trash"));
-                        deleteBtn.getStyleClass().addAll("action_btn", "delete_btn");
-                        deleteBtn.setTooltip(new Tooltip("Delete Product"));
-
-                        actionsBox.getChildren().addAll(viewBtn, editBtn, deleteBtn);
-
-                        // Set button actions
-                        viewBtn.setOnAction(event -> {
-                            ProductRowData data = getTableView().getItems().get(getIndex());
-                            handleViewProduct(data);
-                        });
-
-                        editBtn.setOnAction(event -> {
-                            ProductRowData data = getTableView().getItems().get(getIndex());
-                            handleEditProduct(data);
-                        });
-
-                        deleteBtn.setOnAction(event -> {
-                            ProductRowData data = getTableView().getItems().get(getIndex());
-                            handleDeleteProduct(data);
-                        });
-                    }
-
-                    @Override
-                    public void updateItem(Void item, boolean empty) {
-                        super.updateItem(item, empty);
-                        if (empty) {
-                            setGraphic(null);
-                        } else {
-                            setGraphic(actionsBox);
-                        }
-                    }
-                };
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                setGraphic(empty ? null : actionsBox);
             }
         });
     }
 
+    // ---------------- Filters ----------------
     private void setupFilters() {
-        // Setup search filter
-        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
-            applyFilters();
-        });
-
-        // Setup category filter
+        searchField.textProperty().addListener((obs, oldVal, newVal) -> applyFilters());
         categoryFilter.setOnAction(e -> applyFilters());
         statusFilter.setOnAction(e -> applyFilters());
     }
@@ -236,54 +190,39 @@ public class ProductController implements Initializable {
         updateProductCount();
     }
 
-    private Predicate<ProductRowData> createFilterPredicate() {
+    private Predicate<ProductDTO> createFilterPredicate() {
         return product -> {
-            // Search filter
             String searchText = searchField.getText();
             if (searchText != null && !searchText.trim().isEmpty()) {
                 String lowerCaseFilter = searchText.toLowerCase();
                 if (!(product.getName().toLowerCase().contains(lowerCaseFilter) ||
                         product.getCode().toLowerCase().contains(lowerCaseFilter) ||
-                        product.getCategoryName().toLowerCase().contains(lowerCaseFilter))) {
+                        (product.getCategoryName() != null && product.getCategoryName().toLowerCase().contains(lowerCaseFilter)))) {
                     return false;
                 }
             }
 
-            // Category filter
             String selectedCategory = categoryFilter.getValue();
-            if (selectedCategory != null && !selectedCategory.isEmpty() &&
-                    !selectedCategory.equals("All Categories")) {
-                if (!product.getCategoryName().equals(selectedCategory)) {
-                    return false;
-                }
+            if (selectedCategory != null && !selectedCategory.equals("All Categories")) {
+                if (!Objects.equals(product.getCategoryName(), selectedCategory)) return false;
             }
 
-            // Status filter
             String selectedStatus = statusFilter.getValue();
-            if (selectedStatus != null && !selectedStatus.isEmpty()) {
-                boolean isActive = "true".equals(selectedStatus);
-                if ((isActive && !"Active".equals(product.getStatus())) ||
-                        (!isActive && "Active".equals(product.getStatus()))) {
-                    return false;
-                }
+            if (selectedStatus != null && !selectedStatus.equals("All Status")) {
+                if ((product.getIsActive() ? "Active" : "Inactive").equals(selectedStatus) == false) return false;
             }
 
             return true;
         };
     }
 
+    // ---------------- Data Loading ----------------
     private void loadData() {
         statusLabel.setText("Loading products...");
-
-        Task<Void> loadTask = new Task<Void>() {
+        Task<Void> loadTask = new Task<>() {
             @Override
-            protected Void call() throws Exception {
-                // Load categories for filter
-                loadCategories();
-
-                // Load products
+            protected Void call() {
                 loadProducts();
-
                 return null;
             }
         };
@@ -292,289 +231,187 @@ public class ProductController implements Initializable {
             statusLabel.setText("Products loaded successfully");
             updateProductCount();
         });
+        loadTask.setOnFailed(e -> statusLabel.setText("Failed to load products"));
 
-        loadTask.setOnFailed(e -> {
-            statusLabel.setText("Failed to load products");
-            showErrorAlert("Error", "Failed to load products: " + loadTask.getException().getMessage());
-        });
-
-        Thread thread = new Thread(loadTask);
-        thread.setDaemon(true);
-        thread.start();
-    }
-
-    private void loadCategories() {
-        try {
-            // TODO: Replace with actual service call
-            // categories = categoryService.findAllActive();
-
-            Platform.runLater(() -> {
-                ObservableList<String> categoryNames = FXCollections.observableArrayList();
-                categoryNames.add("All Categories");
-                // Sample categories
-                categoryNames.addAll("Stationery", "Books", "Electronics", "Accessories");
-                categoryFilter.setItems(categoryNames);
-                categoryFilter.setValue("All Categories");
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        new Thread(loadTask).start();
     }
 
     private void loadProducts() {
         try {
+            List<Map<String, Object>> productMaps = productAPIController.getProducts();
+            List<ProductDTO> dtos = productMaps.stream()
+                    .map(this::mapToDTO)
+                    .collect(Collectors.toList());
+
             Platform.runLater(() -> {
                 allProducts.clear();
-                // Sample product data
-                allProducts.addAll(
-                        new ProductRowData(1L, "NB001", "Notebook A4", "Stationery", "Piece", 25.0, 20.0, 50, 10, "Active"),
-                        new ProductRowData(2L, "PEN001", "Pen Blue", "Stationery", "Piece", 5.0, 3.0, 15, 20, "Active"),
-                        new ProductRowData(3L, "BK001", "Mathematics Book", "Books", "Piece", 150.0, 120.0, 25, 5, "Active"),
-                        new ProductRowData(4L, "CAL001", "Calculator", "Electronics", "Piece", 250.0, 200.0, 8, 5, "Inactive"),
-                        new ProductRowData(5L, "PEN002", "Pencil HB", "Stationery", "Piece", 3.0, 2.0, 5, 15, "Active")
-                );
+                allProducts.addAll(dtos);
+                updateCategoryFilter();
             });
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    private ProductDTO mapToDTO(Map<String, Object> map) {
+        ProductDTO dto = new ProductDTO();
+        dto.setId((Long) map.get("id"));
+        dto.setCode((String) map.get("code"));
+        dto.setName((String) map.get("name"));
+        dto.setDescription((String) map.get("description"));
+        dto.setBarcode((String) map.get("barcode"));
+        dto.setUnit((String) map.get("unit"));
+        dto.setBasePrice((Double) map.get("basePrice"));
+        dto.setCostPrice((Double) map.get("costPrice"));
+        dto.setIsActive((Boolean) map.get("isActive"));
+        dto.setCategoryId((Long) map.get("categoryId"));
+        dto.setCategoryName((String) map.get("categoryName"));
+        return dto;
+    }
+
+    private void updateCategoryFilter() {
+        ObservableList<String> categoryNames = FXCollections.observableArrayList("All Categories");
+        allProducts.stream()
+                .map(ProductDTO::getCategoryName)
+                .filter(Objects::nonNull)
+                .distinct()
+                .sorted()
+                .forEach(categoryNames::add);
+
+        String currentSelection = categoryFilter.getValue();
+        categoryFilter.setItems(categoryNames);
+        categoryFilter.setValue(categoryNames.contains(currentSelection) ? currentSelection : "All Categories");
+    }
+
     private void updateProductCount() {
         Platform.runLater(() -> {
-            int filteredCount = filteredProducts.size();
-            int totalCount = allProducts.size();
-            productCountLabel.setText(String.format("(%d of %d products)", filteredCount, totalCount));
+            productCountLabel.setText(String.format("(%d of %d products)", filteredProducts.size(), allProducts.size()));
         });
     }
 
-    // Event handlers
-    @FXML
-    private void handleAddProduct() {
-        openProductDialog(null);
-    }
-
-    @FXML
-    private void handleRefresh() {
-        loadData();
-    }
-
-    @FXML
-    private void handleSearch() {
-        applyFilters();
-    }
-
-    @FXML
-    private void handleCategoryFilter() {
-        applyFilters();
-    }
-
-    @FXML
-    private void handleStatusFilter() {
-        applyFilters();
-    }
-
-    @FXML
-    private void handleClearFilters() {
-        searchField.clear();
-        categoryFilter.setValue("All Categories");
-        statusFilter.setValue(null);
-        applyFilters();
-    }
-
-    private void handleViewProduct(ProductRowData product) {
+    // ---------------- Actions ----------------
+    private void handleViewProduct(ProductDTO product) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Product Details");
         alert.setHeaderText("Product: " + product.getName());
-
-        String content = String.format(
-                "Code: %s\nCategory: %s\nUnit: %s\nBase Price: ₹%.2f\nCost Price: ₹%.2f\nCurrent Stock: %d\nMin Stock: %d\nStatus: %s",
-                product.getCode(), product.getCategoryName(), product.getUnit(),
-                product.getBasePrice(), product.getCostPrice(),
-                product.getCurrentStock(), product.getMinStockLevel(), product.getStatus()
-        );
-
-        alert.setContentText(content);
+        alert.setContentText("Code: " + product.getCode() +
+                "\nCategory: " + product.getCategoryName() +
+                "\nUnit: " + product.getUnit() +
+                "\nBase Price: ₹" + product.getBasePrice() +
+                "\nCost Price: ₹" + product.getCostPrice() +
+                "\nStock: " + product.getCurrentStock() +
+                "\nMin Stock: " + product.getMinStockLevel() +
+                "\nStatus: " + (product.getIsActive() ? "Active" : "Inactive") +
+                "\nDescription: " + product.getDescription());
         alert.showAndWait();
     }
 
-    private void handleEditProduct(ProductRowData product) {
+    private void handleEditProduct(ProductDTO product) {
         openProductDialog(product);
     }
 
-    private void handleDeleteProduct(ProductRowData product) {
-        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmation.setTitle("Delete Product");
-        confirmation.setHeaderText("Are you sure you want to delete this product?");
-        confirmation.setContentText(String.format("Product: %s (%s)\nThis action cannot be undone.",
-                product.getName(), product.getCode()));
+    private void handleDeleteProduct(ProductDTO product) {
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Confirm Delete");
+        confirm.setHeaderText("Are you sure you want to delete this product?");
+        confirm.setContentText(product.getName() + " will be marked as inactive.");
 
-        ButtonType deleteButton = new ButtonType("Delete", ButtonBar.ButtonData.OK_DONE);
-        ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
-        confirmation.getButtonTypes().setAll(deleteButton, cancelButton);
-
-        // Style the delete button as dangerous
-        confirmation.getDialogPane().lookupButton(deleteButton).getStyleClass().add("danger_btn");
-
-        Optional<ButtonType> result = confirmation.showAndWait();
-        if (result.isPresent() && result.get() == deleteButton) {
-            performDeleteProduct(product);
+        Optional<ButtonType> result = confirm.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            boolean success = productAPIController.deleteProduct(product.getId());
+            if (success) {
+                product.setIsActive(false); // update local DTO
+                productsTable.refresh(); // refresh table to update status column
+                updateProductCount();
+            } else {
+                showErrorAlert("Delete Failed", "Could not delete product.");
+            }
         }
     }
 
-    private void performDeleteProduct(ProductRowData product) {
-        Task<Boolean> deleteTask = new Task<Boolean>() {
-            @Override
-            protected Boolean call() throws Exception {
-                // TODO: Call actual service to delete product
-                // return productService.deleteProduct(product.getId());
-
-                // Simulate deletion
-                Thread.sleep(1000);
-                return true;
-            }
-        };
-
-        deleteTask.setOnSucceeded(e -> {
-            if (deleteTask.getValue()) {
-                allProducts.remove(product);
-                updateProductCount();
-                statusLabel.setText("Product deleted successfully");
-                showSuccessAlert("Success", "Product deleted successfully");
-            } else {
-                showErrorAlert("Error", "Failed to delete product");
-            }
-        });
-
-        deleteTask.setOnFailed(e -> {
-            showErrorAlert("Error", "Failed to delete product: " + deleteTask.getException().getMessage());
-        });
-
-        statusLabel.setText("Deleting product...");
-        Thread thread = new Thread(deleteTask);
-        thread.setDaemon(true);
-        thread.start();
+    private void showErrorAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
-    private void openProductDialog(ProductRowData product) {
+    public void handleAddProduct(ActionEvent event) {
+        openProductDialog(null); // Passing null signals it's a new product
+    }
+
+
+    private void openProductDialog(ProductDTO product) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/scenes/product-dialog.fxml"));
             Parent root = loader.load();
-
-//            ProductDialogController controller = loader.getController();
-//            controller.setCategories(categories);
-//
-//            if (product != null) {
-//                controller.setProduct(product);
-//            }
-//
-//            Stage dialogStage = new Stage();
-//            dialogStage.setTitle(product == null ? "Add Product" : "Edit Product");
-//            dialogStage.initModality(Modality.WINDOW_MODAL);
-//            dialogStage.initOwner(productsTable.getScene().getWindow());
-//            dialogStage.setScene(new Scene(root));
-//            dialogStage.setResizable(false);
-//
-//            controller.setDialogStage(dialogStage);
-//            controller.setOnProductSaved(this::onProductSaved);
-
-//            dialogStage.showAndWait();
-
+            ProductDialogController controller = loader.getController();
+            controller.setCategories(categories);
+            controller.setProduct(product);
+            Stage dialogStage = new Stage();
+            dialogStage.initModality(Modality.WINDOW_MODAL);
+            dialogStage.initOwner(productsTable.getScene().getWindow());
+            dialogStage.setScene(new Scene(root));
+            controller.setDialogStage(dialogStage);
+            controller.setOnProductSaved(this::onProductSaved);
+            dialogStage.showAndWait();
         } catch (IOException e) {
             showErrorAlert("Error", "Could not open product dialog: " + e.getMessage());
         }
     }
 
-    private void onProductSaved(ProductRowData savedProduct) {
-        if (savedProduct.getId() == null || savedProduct.getId() == 0) {
-            // New product
-            savedProduct.setId((long) (allProducts.size() + 1));
-            allProducts.add(savedProduct);
+    private void onProductSaved(ProductDTO savedProduct) {
+        // If product already exists in the list, replace it
+        Optional<ProductDTO> existing = allProducts.stream()
+                .filter(p -> p.getId().equals(savedProduct.getId()))
+                .findFirst();
+
+        if (existing.isPresent()) {
+            int index = allProducts.indexOf(existing.get());
+            allProducts.set(index, savedProduct);
         } else {
-            // Update existing product
-            for (int i = 0; i < allProducts.size(); i++) {
-                if (allProducts.get(i).getId().equals(savedProduct.getId())) {
-                    allProducts.set(i, savedProduct);
-                    break;
-                }
-            }
+            allProducts.add(savedProduct);
         }
-        updateProductCount();
-        statusLabel.setText("Product saved successfully");
-    }
 
-    private void showErrorAlert(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Error");
-        alert.setHeaderText(title);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
+        // Refresh filters and table
+        updateCategoryFilter();
+        applyFilters();
 
-    private void showSuccessAlert(String title, String message) {
+        // Show success message
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Success");
-        alert.setHeaderText(title);
-        alert.setContentText(message);
+        alert.setHeaderText(null);
+        alert.setContentText("Product saved successfully!");
         alert.showAndWait();
     }
 
-    // Data class for table rows
-    public static class ProductRowData {
-        private Long id;
-        private String code;
-        private String name;
-        private String categoryName;
-        private String unit;
-        private Double basePrice;
-        private Double costPrice;
-        private Integer currentStock;
-        private Integer minStockLevel;
-        private String status;
-
-        public ProductRowData(Long id, String code, String name, String categoryName, String unit,
-                              Double basePrice, Double costPrice, Integer currentStock,
-                              Integer minStockLevel, String status) {
-            this.id = id;
-            this.code = code;
-            this.name = name;
-            this.categoryName = categoryName;
-            this.unit = unit;
-            this.basePrice = basePrice;
-            this.costPrice = costPrice;
-            this.currentStock = currentStock;
-            this.minStockLevel = minStockLevel;
-            this.status = status;
-        }
-
-        // Getters and setters
-        public Long getId() { return id; }
-        public void setId(Long id) { this.id = id; }
-
-        public String getCode() { return code; }
-        public void setCode(String code) { this.code = code; }
-
-        public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
-
-        public String getCategoryName() { return categoryName; }
-        public void setCategoryName(String categoryName) { this.categoryName = categoryName; }
-
-        public String getUnit() { return unit; }
-        public void setUnit(String unit) { this.unit = unit; }
-
-        public Double getBasePrice() { return basePrice; }
-        public void setBasePrice(Double basePrice) { this.basePrice = basePrice; }
-
-        public Double getCostPrice() { return costPrice; }
-        public void setCostPrice(Double costPrice) { this.costPrice = costPrice; }
-
-        public Integer getCurrentStock() { return currentStock; }
-        public void setCurrentStock(Integer currentStock) { this.currentStock = currentStock; }
-
-        public Integer getMinStockLevel() { return minStockLevel; }
-        public void setMinStockLevel(Integer minStockLevel) { this.minStockLevel = minStockLevel; }
-
-        public String getStatus() { return status; }
-        public void setStatus(String status) { this.status = status; }
+    @FXML
+    private void handleRefresh(ActionEvent event) {
+        loadData();
     }
+
+    @FXML
+    private void handleSearch(ActionEvent event) {
+        applyFilters();
+    }
+
+    @FXML
+    private void handleCategoryFilter(ActionEvent event) {
+        applyFilters();
+    }
+
+    @FXML
+    private void handleStatusFilter(ActionEvent event) {
+        applyFilters();
+    }
+
+    @FXML
+    private void handleClearFilters(ActionEvent event) {
+        searchField.clear();
+        categoryFilter.setValue("All Categories");
+        statusFilter.setValue("All Status");
+        applyFilters();
+    }
+
 }

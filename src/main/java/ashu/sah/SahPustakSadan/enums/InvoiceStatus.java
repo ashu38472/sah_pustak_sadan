@@ -5,5 +5,6 @@ public enum InvoiceStatus {
     UNPAID,
     PARTIALLY_PAID,
     OVERDUE,
-    CANCELLED
+    CANCELLED,
+    REFUNDED
 }

@@ -6,6 +6,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "inventory_logs", indexes = {
         @Index(name = "idx_inventory_log_product", columnList = "product_id"),
@@ -32,6 +34,9 @@ public class InventoryLog extends BaseEntity {
     @Column(name = "movement_type", nullable = false)
     private MovementType movementType;
 
+    @Column(name = "logged_at", nullable = false)
+    private LocalDateTime loggedAt;
+
     @Column(name = "reference_id")
     private Long referenceId;
 
@@ -46,4 +51,11 @@ public class InventoryLog extends BaseEntity {
 
     @Column(name = "quantity_after", nullable = false)
     private Integer quantityAfter;
+
+    @PrePersist
+    private void onCreate() {
+        if (loggedAt == null) {
+            loggedAt = LocalDateTime.now();
+        }
+    }
 }

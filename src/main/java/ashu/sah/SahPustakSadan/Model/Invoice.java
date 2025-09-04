@@ -1,6 +1,8 @@
 package ashu.sah.SahPustakSadan.Model;
 
 import ashu.sah.SahPustakSadan.enums.InvoiceStatus;
+import ashu.sah.SahPustakSadan.enums.TransactionStatus;
+import ashu.sah.SahPustakSadan.enums.TransactionType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import lombok.Data;
@@ -12,7 +14,6 @@ import java.util.List;
 
 @Entity
 @Table(name = "invoices", indexes = {
-        @Index(name = "idx_invoice_transaction", columnList = "transaction_id"),
         @Index(name = "idx_invoice_number", columnList = "invoice_number"),
         @Index(name = "idx_invoice_status", columnList = "status"),
         @Index(name = "idx_invoice_due_date", columnList = "due_date")
@@ -20,11 +21,12 @@ import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class Invoice extends BaseEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "invoice", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Transaction> transactions = new ArrayList<>();
 
     @Column(name = "invoice_number", unique = true, nullable = false)
@@ -57,11 +59,40 @@ public class Invoice extends BaseEntity {
     @PrePersist
     @PreUpdate
     private void calculateBalance() {
-        if (totalAmount != null && paidAmount != null) {
-            balanceAmount = totalAmount - paidAmount;
-        }
+        // Default issuedAt
         if (issuedAt == null) {
             issuedAt = LocalDateTime.now();
+        }
+
+        // Check if any refund transaction exists
+        boolean hasRefund = transactions.stream()
+                .anyMatch(t -> t.getTransactionType() == TransactionType.REFUND
+                        && t.getStatus() == TransactionStatus.COMPLETED);
+
+        if (hasRefund) {
+            // Full refund: reset paid amount
+            paidAmount = 0.0;
+            balanceAmount = totalAmount;
+            status = InvoiceStatus.REFUNDED; // Optional: add a REFUNDED enum
+        } else {
+            // Sum of all completed payment transactions
+            double sumPaid = transactions.stream()
+                    .filter(t -> t.getTransactionType() == TransactionType.PAYMENT
+                            && t.getStatus() == TransactionStatus.COMPLETED)
+                    .mapToDouble(Transaction::getFinalAmount)
+                    .sum();
+
+            paidAmount = sumPaid;
+            balanceAmount = totalAmount - paidAmount;
+
+            // Update status based on payment
+            if (balanceAmount <= 0) {
+                status = InvoiceStatus.PAID;
+            } else if (paidAmount > 0) {
+                status = InvoiceStatus.PARTIALLY_PAID;
+            } else {
+                status = InvoiceStatus.UNPAID;
+            }
         }
     }
 }
