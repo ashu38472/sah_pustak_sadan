@@ -20,6 +20,8 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -96,10 +98,8 @@ public class AppController implements Initializable {
     }
 
     private void handleProduct() {
-        sidebarController.setActiveButton("productStock");
-        System.out.println("handle func");
+        sidebarController.setActiveButton("product");
         loadProductManagement();
-        statusLabel.setText("Product management loaded");
     }
 
     private void handlePriceCalculator() {
@@ -132,7 +132,7 @@ public class AppController implements Initializable {
         if (result.isPresent() && result.get() == ButtonType.OK) {
             try {
                 userSession.logout();
-                sceneManager.switchScene("classpath:/scenes/login.fxml", "Login - Sah Pustak Sadan");
+                sceneManager.switchScene("file:src/main/resources/scenes/login.fxml", "Login - Sah Pustak Sadan");
             } catch (IOException e) {
                 showErrorAlert("Error during logout", "Could not return to login screen.");
             }
@@ -153,7 +153,8 @@ public class AppController implements Initializable {
         try {
             statusLabel.setText("Loading dashboard...");
 
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/scenes/dashboard/dashboard.fxml"));
+            Path fxmlPath = Paths.get("src/main/resources/scenes/dashboard/dashboard.fxml");
+            FXMLLoader loader = new FXMLLoader(fxmlPath.toUri().toURL());
             Node dashboardContent = loader.load();
             dashboardController = loader.getController();
 
@@ -171,7 +172,8 @@ public class AppController implements Initializable {
         try {
             statusLabel.setText("Loading product management...");
 
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/scenes/product/product.fxml"));
+            Path fxmlPath = Paths.get("src/main/resources/scenes/product/product.fxml");
+            FXMLLoader loader = new FXMLLoader(fxmlPath.toUri().toURL());
             Node productContent = loader.load();
             productController = loader.getController();
             System.out.println("test");

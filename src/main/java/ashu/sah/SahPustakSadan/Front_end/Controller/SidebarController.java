@@ -31,8 +31,6 @@ public class SidebarController {
             new ButtonConfig("product", "Product", "fas-clipboard-list", true),
             new ButtonConfig("invoice", "Invoice", "fas-file-invoice",
                     () -> userSession.canAccessInvoice()),
-            new ButtonConfig("productStock", "Product Stock", "fas-clipboard-list",
-                    () -> userSession.canAccessProductStock()),
             new ButtonConfig("priceCalc", "Price Calculator", "fas-calculator",
                     () -> userSession.canAccessPriceCalculator()),
             new ButtonConfig("profile", "Profile", "far-user-circle",

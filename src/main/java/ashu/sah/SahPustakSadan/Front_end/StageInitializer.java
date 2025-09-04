@@ -19,7 +19,7 @@ import java.io.InputStream;
 
 @Component
 public class StageInitializer implements ApplicationListener<StageReadyEvent> {
-    @Value("classpath:/scenes/login.fxml")
+    @Value("file:src/main/resources/scenes/login.fxml")
     private Resource loginResource;
 
     private final String applicationTitle;

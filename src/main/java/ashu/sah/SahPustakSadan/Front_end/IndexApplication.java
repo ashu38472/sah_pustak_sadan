@@ -14,7 +14,7 @@ public class IndexApplication extends Application {
 
     @Override
     public void init() {
-        applicationContext = new SpringApplicationBuilder(SahPustakSadanApplication.class).web(WebApplicationType.NONE).run();}
+        applicationContext = new SpringApplicationBuilder(SahPustakSadanApplication.class).run();}
 
     @Override
     public void stop() {
