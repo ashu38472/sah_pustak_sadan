@@ -1,6 +1,7 @@
 package ashu.sah.SahPustakSadan.Model;
 
 import ashu.sah.SahPustakSadan.enums.TransactionStatus;
+import ashu.sah.SahPustakSadan.enums.TransactionType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import lombok.Data;
@@ -35,6 +36,10 @@ public class Transaction extends BaseEntity {
     private User user;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "transaction_type", nullable = false, length = 20)
+    private TransactionType transactionType;
+
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TransactionStatus status;
 
@@ -63,6 +68,10 @@ public class Transaction extends BaseEntity {
     private Double finalAmount = 0.0;
 
     private String notes;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "invoice_id")
+    private Invoice invoice;
 
     @OneToMany(mappedBy = "transaction", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<TransactionItem> items = new ArrayList<>();
