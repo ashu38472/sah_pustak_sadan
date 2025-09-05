@@ -1,7 +1,9 @@
 package ashu.sah.SahPustakSadan.Front_end.Controller.Product;
 
+import ashu.sah.SahPustakSadan.APIController.CategoryAPIController;
 import ashu.sah.SahPustakSadan.APIController.product.ProductAPIController;
 import ashu.sah.SahPustakSadan.Front_end.Stage.SceneManager;
+import ashu.sah.SahPustakSadan.Front_end.Types.CategoryDTO;
 import ashu.sah.SahPustakSadan.Front_end.Types.ProductDTO;
 import ashu.sah.SahPustakSadan.Model.Category;
 import ashu.sah.SahPustakSadan.Service.UserSession;
@@ -58,10 +60,11 @@ public class ProductController implements Initializable {
     @Autowired private SceneManager sceneManager;
     @Autowired private UserSession userSession;
     @Autowired private ProductAPIController productAPIController;
+    @Autowired private CategoryAPIController categoryAPIController;
 
     private final ObservableList<ProductDTO> allProducts = FXCollections.observableArrayList();
     private FilteredList<ProductDTO> filteredProducts;
-    private List<Category> categories;
+    private List<Map<String, Object>> categories;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -269,6 +272,22 @@ public class ProductController implements Initializable {
         return dto;
     }
 
+    private CategoryDTO mapToCategoryDTO(Map<String, Object> map) {
+        if (map == null) return null;
+
+        CategoryDTO dto = new CategoryDTO();
+        dto.setId((Long) map.get("id"));
+        dto.setName((String) map.get("name"));
+        dto.setDescription((String) map.get("description"));
+        dto.setIsActive((Boolean) map.get("isActive"));
+        return dto;
+    }
+
+    private List<CategoryDTO> mapToCategoryDTOList(List<Map<String, Object>> maps) {
+        if (maps == null) return Collections.emptyList();
+        return maps.stream().map(this::mapToCategoryDTO).collect(Collectors.toList());
+    }
+
     private void updateCategoryFilter() {
         ObservableList<String> categoryNames = FXCollections.observableArrayList("All Categories");
         allProducts.stream()
@@ -343,21 +362,35 @@ public class ProductController implements Initializable {
 
 
     private void openProductDialog(ProductDTO product) {
+        // Lazy-load categories if not loaded yet
+        if (categories == null) {
+            categories = categoryAPIController.getCategories(); // Returns List<Map<String, Object>>
+        }
+
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/scenes/product-dialog.fxml"));
-            Parent root = loader.load();
-            ProductDialogController controller = loader.getController();
-            controller.setCategories(categories);
+            SceneManager.ViewTuple<ProductDialogController> tuple =
+                    sceneManager.loadViewWithRoot("classpath:/scenes/product/product-dialog.fxml");
+
+            ProductDialogController controller = tuple.getController();
+            // Convert Maps to DTOs for the frontend
+            controller.setCategories(mapToCategoryDTOList(categories));
             controller.setProduct(product);
+
             Stage dialogStage = new Stage();
             dialogStage.initModality(Modality.WINDOW_MODAL);
             dialogStage.initOwner(productsTable.getScene().getWindow());
-            dialogStage.setScene(new Scene(root));
+            dialogStage.setScene(new Scene(tuple.getView()));
+
             controller.setDialogStage(dialogStage);
             controller.setOnProductSaved(this::onProductSaved);
+
             dialogStage.showAndWait();
         } catch (IOException e) {
-            showErrorAlert("Error", "Could not open product dialog: " + e.getMessage());
+            e.printStackTrace();
+            showErrorAlert("Dialog Error", "Failed to load product dialog: " + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            showErrorAlert("Unexpected Error", "An unexpected error occurred: " + e.getMessage());
         }
     }
 

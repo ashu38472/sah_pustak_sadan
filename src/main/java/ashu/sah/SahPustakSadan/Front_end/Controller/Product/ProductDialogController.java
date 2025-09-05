@@ -1,9 +1,10 @@
 package ashu.sah.SahPustakSadan.Front_end.Controller.Product;
 
+import ashu.sah.SahPustakSadan.Front_end.Types.CategoryDTO;
 import ashu.sah.SahPustakSadan.Front_end.Types.ProductDTO;
-import ashu.sah.SahPustakSadan.Model.Category;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -42,10 +43,15 @@ public class ProductDialogController implements Initializable {
     @Setter private Consumer<ProductDTO> onProductSaved;
     private boolean isEditMode = false;
 
-    private List<Category> categories;
+    private List<CategoryDTO> categories;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        unitCombo.setItems(FXCollections.observableArrayList(
+                "Piece", "Kg", "Liter", "Meter", "Box", "Pack"
+        ));
+        unitCombo.setValue("Piece");
+
         setupFieldListeners();
         setupValidation();
     }
@@ -143,34 +149,53 @@ public class ProductDialogController implements Initializable {
     }
 
     // ---------------- Categories ----------------
-    public void setCategories(List<Category> categories) {
+    public void setCategories(List<CategoryDTO> categories) {
         this.categories = categories;
         categoryCombo.setItems(FXCollections.observableArrayList(
-                categories.stream().map(Category::getName).toList()
+                categories.stream()
+                        .filter(category -> Boolean.TRUE.equals(category.getIsActive()))
+                        .map(CategoryDTO::getName)
+                        .toList()
         ));
+    }
+
+    // Helper method to get category ID by name
+    private Long getCategoryIdByName(String categoryName) {
+        if (categories == null || categoryName == null) return null;
+
+        return categories.stream()
+                .filter(category -> categoryName.equals(category.getName()))
+                .map(CategoryDTO::getId)
+                .findFirst()
+                .orElse(null);
     }
 
     // ---------------- Populate For Edit ----------------
     public void setProduct(ProductDTO product) {
         this.product = product;
-        this.isEditMode = true;
+        this.isEditMode = (product != null);
 
-        dialogTitle.setText("Edit Product");
+        if (isEditMode) {
+            dialogTitle.setText("Edit Product");
 
-        codeField.setText(product.getCode());
-        nameField.setText(product.getName());
-        categoryCombo.setValue(product.getCategoryName());
-        unitCombo.setValue(product.getUnit());
-        barcodeField.setText(product.getBarcode());
-        descriptionArea.setText(product.getDescription());
-        costPriceField.setText(String.valueOf(product.getCostPrice()));
-        basePriceField.setText(String.valueOf(product.getBasePrice()));
-        minStockField.setText(String.valueOf(product.getMinStockLevel()));
-        initialStockField.setText(String.valueOf(product.getCurrentStock()));
-        activeCheckBox.setSelected(Boolean.TRUE.equals(product.getIsActive()));
+            codeField.setText(product.getCode());
+            nameField.setText(product.getName());
+            categoryCombo.setValue(product.getCategoryName());
+            unitCombo.setValue(product.getUnit());
+            barcodeField.setText(product.getBarcode());
+            descriptionArea.setText(product.getDescription());
+            costPriceField.setText(product.getCostPrice() != null ? String.valueOf(product.getCostPrice()) : "");
+            basePriceField.setText(product.getBasePrice() != null ? String.valueOf(product.getBasePrice()) : "");
+            minStockField.setText(product.getMinStockLevel() != null ? String.valueOf(product.getMinStockLevel()) : "");
+            initialStockField.setText(product.getCurrentStock() != null ? String.valueOf(product.getCurrentStock()) : "");
+            activeCheckBox.setSelected(Boolean.TRUE.equals(product.getIsActive()));
 
-        codeField.setDisable(true); // cannot edit code
-        calculateProfitMargin();
+            codeField.setDisable(true); // cannot edit code
+            calculateProfitMargin();
+        } else {
+            dialogTitle.setText("Add Product");
+            activeCheckBox.setSelected(true); // default to active for new products
+        }
     }
 
     // ---------------- Save / Cancel ----------------
@@ -271,9 +296,11 @@ public class ProductDialogController implements Initializable {
     private ProductDTO collectFormData() {
         ProductDTO dto = new ProductDTO();
         if (isEditMode) dto.setId(product.getId());
+
         dto.setCode(codeField.getText().trim());
         dto.setName(nameField.getText().trim());
         dto.setCategoryName(categoryCombo.getValue());
+        dto.setCategoryId(getCategoryIdByName(categoryCombo.getValue()));
         dto.setUnit(unitCombo.getValue());
         dto.setBasePrice(Double.parseDouble(basePriceField.getText()));
         dto.setCostPrice(Double.parseDouble(costPriceField.getText()));
@@ -282,7 +309,11 @@ public class ProductDialogController implements Initializable {
         dto.setIsActive(activeCheckBox.isSelected());
         dto.setDescription(descriptionArea.getText());
         dto.setBarcode(barcodeField.getText());
+
         return dto;
     }
 
+    public void handleSelectUnit(ActionEvent actionEvent) {
+        // Handle unit selection if needed
+    }
 }

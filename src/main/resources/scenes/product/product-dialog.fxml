@@ -4,6 +4,8 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
+<?import javafx.collections.FXCollections?>
+<?import java.lang.String?>
 
 <?import java.lang.String?>
 <VBox xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1"
@@ -54,14 +56,17 @@
                     <ComboBox fx:id="unitCombo" GridPane.columnIndex="1" GridPane.rowIndex="3"
                               styleClass="form_field" promptText="Select unit" maxWidth="Infinity">
                         <items>
-                            <String value="Piece">Piece</String>
-                            <String value="Kg">Kg</String>
-                            <String value="Liter">Liter</String>
-                            <String value="Meter">Meter</String>
-                            <String value="Box">Box</String>
-                            <String value="Pack">Pack</String>
+                            <FXCollections fx:factory="observableArrayList">
+                                <String fx:value="Piece" />
+                                <String fx:value="Kg" />
+                                <String fx:value="Liter" />
+                                <String fx:value="Meter" />
+                                <String fx:value="Box" />
+                                <String fx:value="Pack" />
+                            </FXCollections>
                         </items>
                     </ComboBox>
+
 
                     <!-- Barcode -->
                     <Label text="Barcode" GridPane.columnIndex="0" GridPane.rowIndex="4"

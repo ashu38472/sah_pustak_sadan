@@ -8,6 +8,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
@@ -153,14 +154,13 @@ public class AppController implements Initializable {
         try {
             statusLabel.setText("Loading dashboard...");
 
-            Path fxmlPath = Paths.get("src/main/resources/scenes/dashboard/dashboard.fxml");
-            FXMLLoader loader = new FXMLLoader(fxmlPath.toUri().toURL());
-            Node dashboardContent = loader.load();
-            dashboardController = loader.getController();
+            SceneManager.ViewTuple<DashboardController> tuple =
+                    sceneManager.loadViewWithRoot("classpath:/scenes/dashboard/dashboard.fxml");
 
-            setMainContent(dashboardContent);
+            dashboardController = tuple.getController();
+            setMainContent(tuple.getView());
+
             statusLabel.setText("Dashboard loaded successfully");
-
         } catch (IOException e) {
             e.printStackTrace();
             showErrorAlert("Error loading dashboard", e.getMessage());
@@ -172,15 +172,13 @@ public class AppController implements Initializable {
         try {
             statusLabel.setText("Loading product management...");
 
-            Path fxmlPath = Paths.get("src/main/resources/scenes/product/product.fxml");
-            FXMLLoader loader = new FXMLLoader(fxmlPath.toUri().toURL());
-            Node productContent = loader.load();
-            productController = loader.getController();
-            System.out.println("test");
+            SceneManager.ViewTuple<ProductController> tuple =
+                    sceneManager.loadViewWithRoot("classpath:/scenes/product/product.fxml");
 
-            setMainContent(productContent);
+            productController = tuple.getController();
+            setMainContent(tuple.getView());
+
             statusLabel.setText("Product management loaded successfully");
-
         } catch (IOException e) {
             e.printStackTrace();
             showErrorAlert("Error loading product management", e.getMessage());
