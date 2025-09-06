@@ -3,216 +3,236 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
-<?import org.kordamp.ikonli.javafx.FontIcon?>
-<?import javafx.collections.FXCollections?>
-<?import java.lang.String?>
 
 <BorderPane xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="ashu.sah.SahPustakSadan.Front_end.Controller.Product.ProductFormController"
-            styleClass="main_container">
+            fx:id="scene" styleClass="modern-container">
 
-    <!-- Header Section -->
     <top>
-        <VBox styleClass="page_header" spacing="15">
-            <!-- Navigation Header -->
-            <HBox styleClass="nav_header" alignment="CENTER_LEFT" spacing="15">
-                <Button fx:id="backButton" text="← Back to Products" styleClass="nav_back_btn"
-                        onAction="#handleBack" />
-                <Separator orientation="VERTICAL" />
-                <FontIcon iconLiteral="fas-shopping-cart" iconSize="24" styleClass="header_icon" />
-                <Text fx:id="formTitle" text="Add New Product" styleClass="page_title" />
+        <VBox styleClass="header-section">
+            <HBox styleClass="nav-bar" alignment="CENTER_LEFT">
+                <Button fx:id="backButton" styleClass="nav-back-button" />
+                <Separator orientation="VERTICAL" styleClass="nav-separator" />
+                <StackPane fx:id="navIcon" styleClass="nav-icon" />
+                <Text fx:id="formTitle" text="Add New Product" styleClass="page-title" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Label fx:id="statusIndicator" styleClass="status-indicator" />
             </HBox>
 
-            <!-- Breadcrumb -->
-            <HBox styleClass="breadcrumb" spacing="5" alignment="CENTER_LEFT">
-                <Label text="Products" styleClass="breadcrumb_item" />
-                <Label text=">" styleClass="breadcrumb_separator" />
-                <Label text="Add Product" styleClass="breadcrumb_current" />
+            <HBox styleClass="breadcrumb-container" alignment="CENTER_LEFT">
+                <Label text="Products" styleClass="breadcrumb-item" />
+                <Label text="/" styleClass="breadcrumb-separator" />
+                <Label fx:id="breadcrumbCurrent" text="Add Product" styleClass="breadcrumb-current" />
             </HBox>
         </VBox>
     </top>
 
-    <!-- Main Content -->
     <center>
-        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS"
-                    styleClass="form_scroll_pane">
-            <VBox spacing="25" styleClass="form_container" maxWidth="800">
+        <ScrollPane styleClass="content-scroll" fitToWidth="true" hbarPolicy="NEVER">
+            <VBox styleClass="form-wrapper" maxWidth="900" spacing="24">
 
-                <!-- Basic Information Section -->
-                <VBox spacing="15" styleClass="form_section">
-                    <HBox alignment="CENTER_LEFT" spacing="10">
-                        <FontIcon iconLiteral="fas-info-circle" iconSize="18" styleClass="section_icon" />
-                        <Text text="Basic Information" styleClass="section_header" />
+                <VBox styleClass="info-card" spacing="20">
+                    <HBox styleClass="card-header" alignment="CENTER_LEFT">
+                        <StackPane fx:id="infoIcon" styleClass="card-icon info-icon" />
+                        <Text text="Product Information" styleClass="card-title" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label fx:id="requiredFieldsLabel" text="* Required fields" styleClass="required-indicator" />
                     </HBox>
 
-                    <GridPane hgap="20" vgap="15" styleClass="form_grid">
+                    <GridPane styleClass="form-grid" hgap="20" vgap="16">
                         <columnConstraints>
-                            <ColumnConstraints hgrow="NEVER" minWidth="140" prefWidth="140" />
+                            <ColumnConstraints hgrow="NEVER" minWidth="120" prefWidth="120" />
                             <ColumnConstraints hgrow="ALWAYS" minWidth="200" />
-                            <ColumnConstraints hgrow="NEVER" minWidth="140" prefWidth="140" />
+                            <ColumnConstraints hgrow="NEVER" minWidth="120" prefWidth="120" />
                             <ColumnConstraints hgrow="ALWAYS" minWidth="200" />
                         </columnConstraints>
 
-                        <!-- Row 1: Product Code & Name -->
-                        <Label text="Product Code *" GridPane.columnIndex="0" GridPane.rowIndex="0"
-                               styleClass="form_label" />
-                        <TextField fx:id="codeField" GridPane.columnIndex="1" GridPane.rowIndex="0"
-                                   styleClass="form_field" promptText="Enter unique product code" />
+                        <VBox GridPane.columnIndex="0" GridPane.rowIndex="0" styleClass="field-group">
+                            <Label text="Product Code" styleClass="field-label required" />
+                        </VBox>
+                        <VBox GridPane.columnIndex="1" GridPane.rowIndex="0" styleClass="field-group">
+                            <TextField fx:id="codeField" styleClass="modern-field"
+                                       promptText="Enter unique code" />
+                            <Label fx:id="codeValidation" styleClass="validation-message" />
+                        </VBox>
 
-                        <Label text="Product Name *" GridPane.columnIndex="2" GridPane.rowIndex="0"
-                               styleClass="form_label" />
-                        <TextField fx:id="nameField" GridPane.columnIndex="3" GridPane.rowIndex="0"
-                                   styleClass="form_field" promptText="Enter product name" />
+                        <VBox GridPane.columnIndex="2" GridPane.rowIndex="0" styleClass="field-group">
+                            <Label text="Product Name" styleClass="field-label required" />
+                        </VBox>
+                        <VBox GridPane.columnIndex="3" GridPane.rowIndex="0" styleClass="field-group">
+                            <TextField fx:id="nameField" styleClass="modern-field"
+                                       promptText="Enter product name" />
+                            <Label fx:id="nameValidation" styleClass="validation-message" />
+                        </VBox>
 
-                        <!-- Row 2: Category & Unit -->
-                        <Label text="Category *" GridPane.columnIndex="0" GridPane.rowIndex="1"
-                               styleClass="form_label" />
-                        <ComboBox fx:id="categoryCombo" GridPane.columnIndex="1" GridPane.rowIndex="1"
-                                  styleClass="form_field" promptText="Select category" maxWidth="Infinity" />
+                        <VBox GridPane.columnIndex="0" GridPane.rowIndex="1" styleClass="field-group">
+                            <Label text="Category" styleClass="field-label required" />
+                        </VBox>
+                        <VBox GridPane.columnIndex="1" GridPane.rowIndex="1" styleClass="field-group">
+                            <ComboBox fx:id="categoryCombo" styleClass="modern-field"
+                                      promptText="Select category" maxWidth="Infinity" />
+                            <Label fx:id="categoryValidation" styleClass="validation-message" />
+                        </VBox>
 
-                        <Label text="Unit *" GridPane.columnIndex="2" GridPane.rowIndex="1"
-                               styleClass="form_label" />
-                        <ComboBox fx:id="unitCombo" GridPane.columnIndex="3" GridPane.rowIndex="1"
-                                  styleClass="form_field" promptText="Select unit" maxWidth="Infinity"
-                                  onAction="#handleSelectUnit">
-                            <items>
-                                <FXCollections fx:factory="observableArrayList">
-                                    <String fx:value="Piece" />
-                                    <String fx:value="Kg" />
-                                    <String fx:value="Liter" />
-                                    <String fx:value="Meter" />
-                                    <String fx:value="Box" />
-                                    <String fx:value="Pack" />
-                                </FXCollections>
-                            </items>
-                        </ComboBox>
+                        <VBox GridPane.columnIndex="2" GridPane.rowIndex="1" styleClass="field-group">
+                            <Label text="Unit" styleClass="field-label required" />
+                        </VBox>
+                        <VBox GridPane.columnIndex="3" GridPane.rowIndex="1" styleClass="field-group">
+                            <ComboBox fx:id="unitCombo" styleClass="modern-field"
+                                      promptText="Select unit" maxWidth="Infinity" />
+                            <Label fx:id="unitValidation" styleClass="validation-message" />
+                        </VBox>
 
-                        <!-- Row 3: Barcode & Status -->
-                        <Label text="Barcode" GridPane.columnIndex="0" GridPane.rowIndex="2"
-                               styleClass="form_label" />
-                        <TextField fx:id="barcodeField" GridPane.columnIndex="1" GridPane.rowIndex="2"
-                                   styleClass="form_field" promptText="Enter barcode (optional)" />
+                        <VBox GridPane.columnIndex="0" GridPane.rowIndex="2" styleClass="field-group">
+                            <Label text="Barcode" styleClass="field-label" />
+                        </VBox>
+                        <VBox GridPane.columnIndex="1" GridPane.rowIndex="2" styleClass="field-group">
+                            <TextField fx:id="barcodeField" styleClass="modern-field"
+                                       promptText="Scan or enter barcode" />
+                        </VBox>
 
-                        <Label text="Status" GridPane.columnIndex="2" GridPane.rowIndex="2"
-                               styleClass="form_label" />
-                        <CheckBox fx:id="activeCheckBox" text="Active Product" GridPane.columnIndex="3" GridPane.rowIndex="2"
-                                  styleClass="form_checkbox" selected="true" />
+                        <VBox GridPane.columnIndex="2" GridPane.rowIndex="2" styleClass="field-group">
+                            <Label text="Status" styleClass="field-label" />
+                        </VBox>
+                        <VBox GridPane.columnIndex="3" GridPane.rowIndex="2" styleClass="field-group">
+                            <HBox alignment="CENTER_LEFT" spacing="8">
+                                <CheckBox fx:id="activeCheckBox" styleClass="modern-checkbox" selected="true" />
+                                <Label text="Active Product" styleClass="checkbox-label" />
+                            </HBox>
+                        </VBox>
                     </GridPane>
                 </VBox>
 
-                <!-- Pricing Information Section -->
-                <VBox spacing="15" styleClass="form_section">
-                    <HBox alignment="CENTER_LEFT" spacing="10">
-                        <FontIcon iconLiteral="fas-dollar-sign" iconSize="18" styleClass="section_icon" />
-                        <Text text="Pricing Information" styleClass="section_header" />
+                <VBox styleClass="info-card" spacing="20">
+                    <HBox styleClass="card-header" alignment="CENTER_LEFT">
+                        <StackPane fx:id="pricingIcon" styleClass="card-icon pricing-icon" />
+                        <Text text="Pricing Information" styleClass="card-title" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label fx:id="profitIndicator" styleClass="profit-indicator" />
                     </HBox>
 
-                    <GridPane hgap="20" vgap="15" styleClass="form_grid">
+                    <GridPane styleClass="form-grid" hgap="20" vgap="16">
                         <columnConstraints>
-                            <ColumnConstraints hgrow="NEVER" minWidth="140" prefWidth="140" />
+                            <ColumnConstraints hgrow="NEVER" minWidth="120" prefWidth="120" />
                             <ColumnConstraints hgrow="ALWAYS" minWidth="200" />
-                            <ColumnConstraints hgrow="NEVER" minWidth="140" prefWidth="140" />
+                            <ColumnConstraints hgrow="NEVER" minWidth="120" prefWidth="120" />
                             <ColumnConstraints hgrow="ALWAYS" minWidth="200" />
                         </columnConstraints>
 
-                        <!-- Row 1: Cost Price & Base Price -->
-                        <Label text="Cost Price *" GridPane.columnIndex="0" GridPane.rowIndex="0"
-                               styleClass="form_label" />
-                        <HBox GridPane.columnIndex="1" GridPane.rowIndex="0" spacing="5" alignment="CENTER_LEFT">
-                            <Label text="₹" styleClass="currency_symbol" />
-                            <TextField fx:id="costPriceField" styleClass="form_field" promptText="0.00"
-                                       HBox.hgrow="ALWAYS" />
-                        </HBox>
+                        <VBox GridPane.columnIndex="0" GridPane.rowIndex="0" styleClass="field-group">
+                            <Label text="Cost Price" styleClass="field-label required" />
+                        </VBox>
+                        <VBox GridPane.columnIndex="1" GridPane.rowIndex="0" styleClass="field-group">
+                            <HBox styleClass="currency-field" alignment="CENTER_LEFT">
+                                <Label text="Rs" styleClass="currency-symbol" />
+                                <TextField fx:id="costPriceField" styleClass="modern-field price-field"
+                                           promptText="0.00" HBox.hgrow="ALWAYS" />
+                            </HBox>
+                            <Label fx:id="costValidation" styleClass="validation-message" />
+                        </VBox>
 
-                        <Label text="Base Price *" GridPane.columnIndex="2" GridPane.rowIndex="0"
-                               styleClass="form_label" />
-                        <HBox GridPane.columnIndex="3" GridPane.rowIndex="0" spacing="5" alignment="CENTER_LEFT">
-                            <Label text="₹" styleClass="currency_symbol" />
-                            <TextField fx:id="basePriceField" styleClass="form_field" promptText="0.00"
-                                       HBox.hgrow="ALWAYS" />
-                        </HBox>
+                        <VBox GridPane.columnIndex="2" GridPane.rowIndex="0" styleClass="field-group">
+                            <Label text="Selling Price" styleClass="field-label required" />
+                        </VBox>
+                        <VBox GridPane.columnIndex="3" GridPane.rowIndex="0" styleClass="field-group">
+                            <HBox styleClass="currency-field" alignment="CENTER_LEFT">
+                                <Label text="Rs" styleClass="currency-symbol" />
+                                <TextField fx:id="basePriceField" styleClass="modern-field price-field"
+                                           promptText="0.00" HBox.hgrow="ALWAYS" />
+                            </HBox>
+                            <Label fx:id="baseValidation" styleClass="validation-message" />
+                        </VBox>
 
-                        <!-- Row 2: Tax Percentage & Profit Margin -->
-                        <Label text="Tax %" GridPane.columnIndex="0" GridPane.rowIndex="1"
-                               styleClass="form_label" />
-                        <HBox GridPane.columnIndex="1" GridPane.rowIndex="1" spacing="5" alignment="CENTER_LEFT">
-                            <TextField fx:id="taxPercentageField" styleClass="form_field" promptText="0.00"
-                                       text="0.00" HBox.hgrow="ALWAYS" />
-                            <Label text="%" styleClass="currency_symbol" />
-                        </HBox>
+                        <VBox GridPane.columnIndex="0" GridPane.rowIndex="1" styleClass="field-group">
+                            <Label text="Tax Rate" styleClass="field-label" />
+                        </VBox>
+                        <VBox GridPane.columnIndex="1" GridPane.rowIndex="1" styleClass="field-group">
+                            <HBox styleClass="percentage-field" alignment="CENTER_LEFT">
+                                <TextField fx:id="taxPercentageField" styleClass="modern-field tax-field"
+                                           promptText="0.00" text="0.00" HBox.hgrow="ALWAYS" />
+                                <Label fx:id="taxPercentageLable" styleClass="percentage-symbol" />
+                            </HBox>
+                        </VBox>
 
-                        <Label text="Profit Margin" GridPane.columnIndex="2" GridPane.rowIndex="1"
-                               styleClass="form_label" />
-                        <HBox GridPane.columnIndex="3" GridPane.rowIndex="1" alignment="CENTER_LEFT"
-                              styleClass="profit_display">
-                            <Label fx:id="profitMarginLabel" text="₹0.00 (0%)" styleClass="profit_value" />
-                        </HBox>
+                        <VBox GridPane.columnIndex="2" GridPane.rowIndex="1" styleClass="field-group">
+                            <Label text="Profit Margin" styleClass="field-label" />
+                        </VBox>
+                        <VBox GridPane.columnIndex="3" GridPane.rowIndex="1" styleClass="field-group">
+                            <HBox styleClass="profit-display" alignment="CENTER_LEFT">
+                                <Label fx:id="profitMarginLabel" text="Rs 0.00 (0%)" styleClass="profit-value" />
+                            </HBox>
+                        </VBox>
                     </GridPane>
                 </VBox>
 
-                <!-- Inventory Information Section -->
-                <VBox spacing="15" styleClass="form_section">
-                    <HBox alignment="CENTER_LEFT" spacing="10">
-                        <FontIcon iconLiteral="fas-boxes" iconSize="18" styleClass="section_icon" />
-                        <Text text="Inventory Information" styleClass="section_header" />
+                <VBox styleClass="info-card" spacing="20">
+                    <HBox styleClass="card-header" alignment="CENTER_LEFT">
+                        <StackPane fx:id="inventoryIcon" styleClass="card-icon inventory-icon" />
+                        <Text text="Inventory Management" styleClass="card-title" />
                     </HBox>
 
-                    <GridPane hgap="20" vgap="15" styleClass="form_grid">
+                    <GridPane styleClass="form-grid" hgap="20" vgap="16">
                         <columnConstraints>
-                            <ColumnConstraints hgrow="NEVER" minWidth="140" prefWidth="140" />
+                            <ColumnConstraints hgrow="NEVER" minWidth="120" prefWidth="120" />
                             <ColumnConstraints hgrow="ALWAYS" minWidth="200" />
-                            <ColumnConstraints hgrow="NEVER" minWidth="140" prefWidth="140" />
+                            <ColumnConstraints hgrow="NEVER" minWidth="120" prefWidth="120" />
                             <ColumnConstraints hgrow="ALWAYS" minWidth="200" />
                         </columnConstraints>
 
-                        <!-- Row 1: Min Stock & Initial Stock -->
-                        <Label text="Min Stock Level *" GridPane.columnIndex="0" GridPane.rowIndex="0"
-                               styleClass="form_label" />
-                        <TextField fx:id="minStockField" GridPane.columnIndex="1" GridPane.rowIndex="0"
-                                   styleClass="form_field" promptText="0" text="0" />
+                        <VBox GridPane.columnIndex="0" GridPane.rowIndex="0" styleClass="field-group">
+                            <Label text="Min. Stock Level" styleClass="field-label required" />
+                        </VBox>
+                        <VBox GridPane.columnIndex="1" GridPane.rowIndex="0" styleClass="field-group">
+                            <TextField fx:id="minStockField" styleClass="modern-field stock-field"
+                                       promptText="0" text="0" />
+                            <Label fx:id="minStockValidation" styleClass="validation-message" />
+                        </VBox>
 
-                        <Label text="Initial Stock" GridPane.columnIndex="2" GridPane.rowIndex="0"
-                               styleClass="form_label" />
-                        <TextField fx:id="initialStockField" GridPane.columnIndex="3" GridPane.rowIndex="0"
-                                   styleClass="form_field" promptText="0" text="0" />
+                        <VBox GridPane.columnIndex="2" GridPane.rowIndex="0" styleClass="field-group">
+                            <Label text="Initial Stock" styleClass="field-label" />
+                        </VBox>
+                        <VBox GridPane.columnIndex="3" GridPane.rowIndex="0" styleClass="field-group">
+                            <TextField fx:id="initialStockField" styleClass="modern-field stock-field"
+                                       promptText="0" text="0" />
+                            <Label fx:id="stockValidation" styleClass="validation-message" />
+                        </VBox>
                     </GridPane>
                 </VBox>
 
-                <!-- Description Section -->
-                <VBox spacing="15" styleClass="form_section">
-                    <HBox alignment="CENTER_LEFT" spacing="10">
-                        <FontIcon iconLiteral="fas-align-left" iconSize="18" styleClass="section_icon" />
-                        <Text text="Product Description" styleClass="section_header" />
+                <VBox styleClass="info-card" spacing="20">
+                    <HBox styleClass="card-header" alignment="CENTER_LEFT">
+                        <StackPane fx:id="descriptionIcon" styleClass="card-icon description-icon" />
+                        <Text text="Product Description" styleClass="card-title" />
                     </HBox>
 
-                    <TextArea fx:id="descriptionArea" styleClass="form_textarea"
-                              promptText="Enter detailed product description (optional)"
-                              prefRowCount="4" wrapText="true" />
+                    <VBox styleClass="field-group">
+                        <TextArea fx:id="descriptionArea" styleClass="modern-textarea"
+                                  promptText="Enter detailed product description, features, specifications, or usage instructions..."
+                                  prefRowCount="4" wrapText="true" />
+                        <HBox alignment="CENTER_RIGHT" spacing="8" styleClass="character-count">
+                            <Label fx:id="characterCount" text="0 / 500" styleClass="count-label" />
+                        </HBox>
+                    </VBox>
                 </VBox>
 
             </VBox>
         </ScrollPane>
     </center>
 
-    <!-- Footer with Action Buttons -->
     <bottom>
-        <HBox styleClass="form_footer" spacing="15" alignment="CENTER_RIGHT" padding="20">
+        <HBox styleClass="action-footer" alignment="CENTER_RIGHT" spacing="12">
+            <HBox fx:id="progressContainer" styleClass="progress-container" alignment="CENTER_LEFT" spacing="8">
+                <ProgressIndicator fx:id="saveProgress" styleClass="save-progress" visible="false" />
+                <Label fx:id="progressLabel" styleClass="progress-label" visible="false" />
+            </HBox>
+
             <Region HBox.hgrow="ALWAYS" />
 
-            <!-- Action Buttons -->
-            <Button fx:id="cancelButton" text="Cancel" styleClass="secondary_btn"
-                    onAction="#handleCancel" prefWidth="100">
-                <graphic>
-                    <FontIcon iconLiteral="fas-times" iconSize="16" />
-                </graphic>
-            </Button>
+            <Button fx:id="cancelButton" text="Cancel" styleClass="secondary-button"
+                    prefWidth="100" />
 
-            <Button fx:id="saveButton" text="Save Product" styleClass="primary_btn"
-                    onAction="#handleSave" prefWidth="120">
-                <graphic>
-                    <FontIcon iconLiteral="fas-save" iconSize="16" />
-                </graphic>
-            </Button>
+            <Button fx:id="saveButton" text="Save Product" styleClass="primary-button"
+                    prefWidth="130" />
         </HBox>
     </bottom>
 
