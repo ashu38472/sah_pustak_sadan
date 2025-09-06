@@ -69,13 +69,23 @@ public class AppController implements Initializable {
     }
 
     private void handleDashboard() {
-        navigation.navigateToDashboard();
-        sidebarController.setActiveButton("dashboard");
+        try {
+            navigation.navigateToDashboard();
+            sidebarController.setActiveButton("dashboard");
+            statusLabel.setText("Dashboard loaded Successfully");
+        } catch (Exception e) {
+            showErrorAlert("Navigation Error", "Could not load dashboard");
+        }
     }
 
     private void handleProduct() {
-        navigation.navigateToProductList();
-        sidebarController.setActiveButton("product");
+        try {
+            navigation.navigateToProductList();
+            sidebarController.setActiveButton("product");
+            statusLabel.setText("Products loaded Successfully");
+        } catch (Exception e) {
+            showErrorAlert("Navigation Error", "Could not load product");
+        }
     }
 
     private void startClock() {
