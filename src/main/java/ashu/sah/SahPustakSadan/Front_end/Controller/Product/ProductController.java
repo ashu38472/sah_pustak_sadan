@@ -79,6 +79,7 @@ public class ProductController implements Initializable {
         productData.clear();
         List<ProductDTO> products = productAPIController.getProducts();
         productData.addAll(products);
+        updateProductCount();
         log.info("Loaded {} products into table", products.size());
     }
 
