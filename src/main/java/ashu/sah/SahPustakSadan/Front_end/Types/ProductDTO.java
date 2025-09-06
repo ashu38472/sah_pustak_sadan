@@ -1,10 +1,12 @@
 package ashu.sah.SahPustakSadan.Front_end.Types;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProductDTO {

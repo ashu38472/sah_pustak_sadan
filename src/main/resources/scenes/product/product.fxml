@@ -76,10 +76,13 @@
                 <columns>
                     <TableColumn fx:id="codeColumn" text="Code" prefWidth="100" />
                     <TableColumn fx:id="nameColumn" text="Product Name" prefWidth="200" />
+                    <TableColumn fx:id="descriptionColumn" text="Description" prefWidth="200"/>
                     <TableColumn fx:id="categoryColumn" text="Category" prefWidth="120" />
                     <TableColumn fx:id="unitColumn" text="Unit"/>
                     <TableColumn fx:id="basePriceColumn" text="Base Price" prefWidth="100" />
                     <TableColumn fx:id="costPriceColumn" text="Cost Price" prefWidth="100" />
+                    <TableColumn fx:id="profitMarginColumn" text="Profit Margin" prefWidth="120"/>
+                    <TableColumn fx:id="isActiveColumn" text="Active" prefWidth="100"/>
                     <TableColumn fx:id="stockColumn" text="Stock"/>
                     <TableColumn fx:id="minStockColumn" text="Min Stock"/>
                     <TableColumn fx:id="statusColumn" text="Status"/>

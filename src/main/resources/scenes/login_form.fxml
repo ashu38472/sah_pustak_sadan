@@ -11,9 +11,9 @@
 <VBox styleClass="login_field_box" stylesheets="@../styles/login.css" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ashu.sah.SahPustakSadan.Front_end.Controller.LoginFormController">
 
     <Label id="label" text="Username" />
-    <TextField fx:id="username" styleClass="input_field" />
+    <TextField fx:id="usernameField" styleClass="input_field" />
     <Label id="label" text="Password" />
-    <PasswordField fx:id="password" styleClass="input_field" />
-    <Button fx:id="login_btn" text="Login" />
+    <PasswordField fx:id="passwordField" styleClass="input_field" />
+    <Button fx:id="loginButton" text="Login" />
     <Label fx:id="error" styleClass="error_lbl" />
 </VBox>

@@ -1,75 +1,76 @@
 package ashu.sah.SahPustakSadan.Service;
 
-import ashu.sah.SahPustakSadan.enums.UserRole;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-@Getter
-@Setter
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+@Slf4j
 @Service
 public class UserSession {
-    private static UserSession instance;
-    private String currentUserId;
-    private String currentUserEmail;
-    private String currentUserName;
-    private UserRole currentUserRole;
-    private boolean isLoggedIn = false;
 
-    private UserSession() {}
+    @Getter
+    private String username;
 
-    public static UserSession getInstance() {
-        if (instance == null) {
-            instance = new UserSession();
-        }
-        return instance;
+    @Getter
+    private String role;
+
+    private LocalDateTime loginTime;
+
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+    @Getter
+    private boolean loggedIn = false;
+
+    // -------------------------------------------------------------------------
+    // Session lifecycle
+    // -------------------------------------------------------------------------
+    public void login(String username) {
+        login(username, "USER"); // default role if not provided
     }
 
-    public void login(String userId, String email, String name, UserRole role) {
-        this.currentUserId = userId;
-        this.currentUserEmail = email;
-        this.currentUserName = name;
-        this.currentUserRole = role;
-        this.isLoggedIn = true;
+    public void login(String username, String role) {
+        this.username = username;
+        this.role = role;
+        this.loginTime = LocalDateTime.now();
+        this.loggedIn = true;
+
+        log.info("User '{}' logged in with role '{}'", username, role);
     }
 
     public void logout() {
-        this.currentUserId = null;
-        this.currentUserEmail = null;
-        this.currentUserName = null;
-        this.currentUserRole = null;
-        this.isLoggedIn = false;
-    }
-
-    public boolean hasRole(UserRole role) {
-        return isLoggedIn && currentUserRole == role;
-    }
-
-    public boolean hasAnyRole(UserRole... roles) {
-        if (!isLoggedIn || currentUserRole == null) return false;
-        for (UserRole role : roles) {
-            if (currentUserRole == role) return true;
+        if (loggedIn) {
+            log.info("User '{}' logged out", username);
         }
-        return false;
+        clearSession();
     }
 
-    public boolean canAccessInvoice() {
-        return hasAnyRole(UserRole.ADMIN, UserRole.MANAGER, UserRole.STAFF);
+    private void clearSession() {
+        this.username = null;
+        this.role = null;
+        this.loginTime = null;
+        this.loggedIn = false;
     }
 
-    public boolean canAccessProductStock() {
-        return hasAnyRole(UserRole.ADMIN, UserRole.MANAGER);
+    public Optional<String> getCurrentUsername() {
+        return Optional.ofNullable(username);
     }
 
-    public boolean canAccessPriceCalculator() {
-        return hasAnyRole(UserRole.ADMIN, UserRole.MANAGER, UserRole.STAFF);
+    public Optional<String> getCurrentRole() {
+        return Optional.ofNullable(role);
     }
 
-    public boolean canAccessProfile() {
-        return isLoggedIn;
+    public Optional<LocalDateTime> getLoginTime() {
+        return Optional.ofNullable(loginTime);
     }
 
-    public boolean canReportBugs() {
-        return isLoggedIn;
+    @Override
+    public String toString() {
+        return loggedIn
+                ? "UserSession{username='" + username + "', role='" + role + "', loginTime=" + loginTime + "}"
+                : "UserSession{not logged in}";
     }
 }

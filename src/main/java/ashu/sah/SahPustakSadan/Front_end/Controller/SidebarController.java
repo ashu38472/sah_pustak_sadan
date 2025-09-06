@@ -30,11 +30,11 @@ public class SidebarController {
             new ButtonConfig("dashboard", "Dashboard", "fas-home", true),
             new ButtonConfig("product", "Product", "fas-clipboard-list", true),
             new ButtonConfig("invoice", "Invoice", "fas-file-invoice",
-                    () -> userSession.canAccessInvoice()),
+                    true),
             new ButtonConfig("priceCalc", "Price Calculator", "fas-calculator",
-                    () -> userSession.canAccessPriceCalculator()),
+                    true),
             new ButtonConfig("profile", "Profile", "far-user-circle",
-                    () -> userSession.canAccessProfile()),
+                    true),
             new ButtonConfig("logout", "Logout", "fas-sign-out-alt", true)
     );
 

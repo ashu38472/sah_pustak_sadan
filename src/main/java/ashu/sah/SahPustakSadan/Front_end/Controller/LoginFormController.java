@@ -1,112 +1,67 @@
 package ashu.sah.SahPustakSadan.Front_end.Controller;
 
 import ashu.sah.SahPustakSadan.APIController.LoginController;
-import ashu.sah.SahPustakSadan.Front_end.Stage.SceneManager;
+import ashu.sah.SahPustakSadan.Front_end.Stage.Navigation;
 import ashu.sah.SahPustakSadan.Service.UserSession;
-import ashu.sah.SahPustakSadan.enums.UserRole;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+@Slf4j
 @Component
 public class LoginFormController implements Initializable {
-    @FXML
-    public TextField username;
-    @FXML
-    public PasswordField password;
-    @FXML
-    public Button login_btn;
-    @FXML
-    public Label error;
+
+    @FXML public Label error;
+    @FXML private TextField usernameField;
+    @FXML private PasswordField passwordField;
+    @FXML private Button loginButton;
 
     @Autowired
     private LoginController loginController;
-
-    @Autowired
-    private SceneManager sceneManager;
-
-    @Autowired
-    private UserSession userSession;
+    @Autowired private UserSession userSession;
+    @Autowired private Navigation navigation;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        login_btn.setOnAction(event -> handleLogin());
-
-        // Add Enter key support
-        username.setOnAction(event -> handleLogin());
-        password.setOnAction(event -> handleLogin());
+        loginButton.setOnAction(event -> handleLogin());
     }
 
     private void handleLogin() {
-        String email = username.getText().trim();
-        String pass = password.getText();
+        String username = usernameField.getText().trim();
+        String password = passwordField.getText().trim();
 
-        if (email.isEmpty() || pass.isEmpty()) {
-            showError("Please fill in all fields.");
+        if (username.isEmpty() || password.isEmpty()) {
+            showErrorAlert("Validation Error", "Username and password must not be empty.");
             return;
         }
 
         try {
-            boolean isAuthenticated = loginController.authenticate(email, pass);
+            boolean authenticated = loginController.authenticate(username, password);
+            if (authenticated) {
+                userSession.login(username);
+                log.info("User '{}' logged in successfully", username);
 
-            if (isAuthenticated) {
-                // Hide error message
-                error.setVisible(false);
-
-                // TODO: Get actual user details from your login service
-                // For now, using demo data - replace with actual user data from database
-                UserRole role = determineUserRole(email); // You should get this from your database
-                String userId = "USER_" + System.currentTimeMillis(); // Generate or get from DB
-                String userName = getUserNameFromEmail(email); // Get from database
-
-                // Set up user session
-                userSession.login(userId, email, userName, role);
-
-                // Switch to dashboard scene
-                sceneManager.switchScene("classpath:/scenes/app.fxml", "Dashboard - Sah Pustak Sadan");
-
+                navigation.enterApp();
             } else {
-                showError("Invalid username or password.");
+                showErrorAlert("Authentication Failed", "Invalid username or password.");
             }
-        } catch (IOException e) {
-            showError("Error loading dashboard. Please try again.");
-            e.printStackTrace();
         } catch (Exception e) {
-            showError("Login failed. Please try again.");
-            e.printStackTrace();
+            log.error("Login error", e);
+            showErrorAlert("Login Error", "An error occurred during login. Please try again.");
         }
     }
 
-    // TODO: Replace this with actual database lookup
-    private UserRole determineUserRole(String email) {
-        // Demo logic - replace with actual database lookup
-        if (email.contains("admin")) {
-            return UserRole.ADMIN;
-        } else if (email.contains("manager")) {
-            return UserRole.MANAGER;
-        } else if (email.contains("staff")) {
-            return UserRole.STAFF;
-        } else {
-            return UserRole.STAFF; // Default role
-        }
-    }
-
-    // TODO: Replace this with actual database lookup
-    private String getUserNameFromEmail(String email) {
-        // Demo logic - replace with actual database lookup
-        String name = email.split("@")[0];
-        return name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
-    }
-
-    private void showError(String message) {
-        error.setText(message);
-        error.setVisible(true);
-        error.setStyle("-fx-text-fill: red;");
+    private void showErrorAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }

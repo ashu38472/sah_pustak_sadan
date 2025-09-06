@@ -357,6 +357,9 @@ public class DashboardController implements Initializable {
         alert.showAndWait();
     }
 
+    public void refreshData() {
+    }
+
     // Data classes for table rows
     public static class ActivityRowData {
         private final String time;
@@ -377,7 +380,10 @@ public class DashboardController implements Initializable {
         public String getType() { return type; }
         public String getDescription() { return description; }
         public String getAmount() { return amount; }
-        public String getUser() { return user; }
+
+        public String getUser() {
+            return null;
+        }
     }
 
     public static class LowStockRowData {

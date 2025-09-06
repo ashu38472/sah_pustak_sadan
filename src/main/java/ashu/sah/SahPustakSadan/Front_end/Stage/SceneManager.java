@@ -24,15 +24,6 @@ public class SceneManager {
     @Autowired
     private ResourceLoader resourceLoader;
 
-    /**
-     * -- SETTER --
-     *  Set the primary stage that will be used for scene switching
-     * <p>
-     *
-     * -- GETTER --
-     *  Get the current stage
-     *
-     */
     @Getter
     @Setter
     private Stage primaryStage;
@@ -49,14 +40,18 @@ public class SceneManager {
             this.view = view;
         }
 
-        public T getController() { return controller; }
-        public Parent getView() { return view; }
+        public T getController() {
+            return controller;
+        }
+
+        public Parent getView() {
+            return view;
+        }
     }
 
     // -------------------------------------------------------------------------
     // FXML Loading Methods
     // -------------------------------------------------------------------------
-
     public <T> ViewTuple<T> loadViewWithRoot(String fxmlPath, Consumer<FXMLLoader> configurer) throws IOException {
         Resource resource = resourceLoader.getResource(fxmlPath);
         FXMLLoader loader = new FXMLLoader(resource.getURL());
@@ -75,18 +70,11 @@ public class SceneManager {
         return loadViewWithRoot(fxmlPath, null);
     }
 
-    /**
-     * Load controller only (if you don’t need the root).
-     */
     @SuppressWarnings("unchecked")
-    public <T> T loadView(String fxmlPath) throws IOException {
+    public <T> T loadController(String fxmlPath) throws IOException {
         return (T) loadViewWithRoot(fxmlPath).getController();
     }
 
-
-    /**
-     * Load root only (if you don’t need the controller).
-     */
     public Parent loadRoot(String fxmlPath) throws IOException {
         return loadViewWithRoot(fxmlPath).getView();
     }
@@ -94,8 +82,7 @@ public class SceneManager {
     // -------------------------------------------------------------------------
     // Scene Switching Methods
     // -------------------------------------------------------------------------
-
-    public void switchScene(String fxmlPath, String title, double width, double height, boolean preserveState) throws IOException {
+    public void switchScene(String fxmlPath, String title, double width, double height) throws IOException {
         if (primaryStage == null) {
             throw new IllegalStateException("Primary stage not set. Call setPrimaryStage() first.");
         }
@@ -111,72 +98,46 @@ public class SceneManager {
     }
 
     public void switchScene(String fxmlPath, String title) throws IOException {
-        switchScene(fxmlPath, title, 0, 0, true);
+        switchScene(fxmlPath, title, 0, 0);
     }
 
     public void switchScene(String fxmlPath) throws IOException {
-        switchScene(fxmlPath, null, 0, 0, true);
-    }
-
-    public void switchSceneWithDimensions(String fxmlPath, String title, double width, double height) throws IOException {
-        switchScene(fxmlPath, title, width, height, false);
-    }
-
-    public void switchSceneAndReset(String fxmlPath, String title, double width, double height) throws IOException {
-        switchScene(fxmlPath, title, width, height, false);
-
-        // Reset stage to centered position
-        javafx.application.Platform.runLater(() -> {
-            primaryStage.setMaximized(false);
-            primaryStage.setFullScreen(false);
-            primaryStage.centerOnScreen();
-        });
+        switchScene(fxmlPath, null, 0, 0);
     }
 
     // -------------------------------------------------------------------------
     // Stage Utility Methods
     // -------------------------------------------------------------------------
-
     public void maximizeStage() {
-        if (primaryStage != null) {
-            primaryStage.setMaximized(true);
-        }
+        if (primaryStage != null) primaryStage.setMaximized(true);
     }
 
     public void minimizeStage() {
-        if (primaryStage != null) {
-            primaryStage.setIconified(true);
-        }
+        if (primaryStage != null) primaryStage.setIconified(true);
     }
 
     public void toggleFullScreen() {
-        if (primaryStage != null) {
-            primaryStage.setFullScreen(!primaryStage.isFullScreen());
-        }
+        if (primaryStage != null) primaryStage.setFullScreen(!primaryStage.isFullScreen());
     }
 
     public void centerStage() {
-        if (primaryStage != null) {
-            primaryStage.centerOnScreen();
-        }
+        if (primaryStage != null) primaryStage.centerOnScreen();
     }
 
     public String getStageStateInfo() {
         if (primaryStage == null) {
             return "No stage available";
         }
-
-        return String.format("Stage State - X: %.0f, Y: %.0f, Width: %.0f, Height: %.0f, " +
-                        "Maximized: %s, Minimized: %s, FullScreen: %s",
+        return String.format(
+                "Stage State - X: %.0f, Y: %.0f, Width: %.0f, Height: %.0f, Maximized: %s, Minimized: %s, FullScreen: %s",
                 primaryStage.getX(), primaryStage.getY(),
                 primaryStage.getWidth(), primaryStage.getHeight(),
                 primaryStage.isMaximized(), primaryStage.isIconified(),
-                primaryStage.isFullScreen());
+                primaryStage.isFullScreen()
+        );
     }
 
     public void closeApplication() {
-        if (primaryStage != null) {
-            primaryStage.close();
-        }
+        if (primaryStage != null) primaryStage.close();
     }
 }
