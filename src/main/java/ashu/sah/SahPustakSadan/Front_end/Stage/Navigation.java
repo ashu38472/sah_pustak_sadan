@@ -95,6 +95,7 @@ public class Navigation {
 
             if (tuple != null) {
                 sceneCache.put(sceneId, new CachedScene<>(tuple.getController(), tuple.getView(), fxmlPath));
+                cleanupCache();
             }
             return tuple;
         } catch (Exception e) {
@@ -107,14 +108,8 @@ public class Navigation {
     // Main content setter
     // -------------------------------------------------------------------------
     public void setMainContent(Node content) {
-        System.out.println("set scene - "+ (rootPane ==null)+" current scene - "+ (currentContent != null));
-
         if (rootPane == null) {
             throw new IllegalStateException("Navigation rootPane not initialized");
-        }
-
-        if (currentContent != null) {
-            rootPane.getChildren().remove(currentContent);
         }
 
         rootPane.setCenter(content);
@@ -200,9 +195,14 @@ public class Navigation {
     // -------------------------------------------------------------------------
     // Cache management
     // -------------------------------------------------------------------------
-    public void clearScene(String sceneId) {
-        sceneCache.remove(sceneId);
-        log.debug("Cleared scene from cache: {}", sceneId);
+    private static final long CACHE_EXPIRY_MS = 30 * 60 * 1000; // 30 min
+
+    private void cleanupCache() {
+        long now = System.currentTimeMillis();
+        sceneCache.entrySet().removeIf(entry -> {
+            CachedScene<?> cached = entry.getValue();
+            return (now - cached.lastAccessed) > CACHE_EXPIRY_MS;
+        });
     }
 
     public void clearAllCache() {
