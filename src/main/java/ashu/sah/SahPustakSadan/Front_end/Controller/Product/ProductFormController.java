@@ -16,23 +16,25 @@ import javafx.scene.text.Text;
 import javafx.util.Duration;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.kordamp.ikonli.javafx.FontIcon;
+import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.net.URL;
 import java.text.DecimalFormat;
+import java.util.Map;
 import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
-
-import org.kordamp.ikonli.javafx.FontIcon;
-import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 
 @Slf4j
 @Component
 public class ProductFormController implements Initializable {
 
-    @FXML public Label taxPercentageLable;
+    @FXML public Label taxPercentageLabel;
+    @FXML public Label taxValidationLabel;
+
     // Header Elements
     @FXML private BorderPane scene;
     @FXML private Button backButton;
@@ -82,7 +84,6 @@ public class ProductFormController implements Initializable {
     @FXML private ProgressIndicator saveProgress;
     @FXML private Label progressLabel;
     @FXML private Label requiredFieldsLabel;
-
     @FXML private StackPane navIcon;
     @FXML private StackPane infoIcon;
     @FXML private StackPane pricingIcon;
@@ -95,13 +96,11 @@ public class ProductFormController implements Initializable {
     private final DecimalFormat currencyFormat = new DecimalFormat("#,##0.00");
     private final DecimalFormat percentFormat = new DecimalFormat("#0.0");
 
-    @Setter
-    private Consumer<ProductDTO> onSaveCallback;
+    @Setter private Consumer<ProductDTO> onSaveCallback;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         log.info("Initializing ProductFormController");
-
         setupUI();
         setupIcons();
         setupEventHandlers();
@@ -114,18 +113,14 @@ public class ProductFormController implements Initializable {
         unitCombo.setItems(FXCollections.observableArrayList(
                 "Piece", "Kg", "Gram", "Liter", "ML", "Meter", "CM", "Box", "Pack", "Dozen"
         ));
-
         categoryCombo.setItems(FXCollections.observableArrayList(
-                "Electronics", "Clothing", "Food & Beverages", "Books", "Home & Garden",
-                "Sports", "Toys", "Beauty", "Automotive", "Office Supplies"
+                "Electronics", "Clothing", "Food & Beverages", "Books", "Home & Garden", "Sports", "Toys", "Beauty", "Automotive", "Office Supplies"
         ));
-
-        taxPercentageLable.setText("%");
+        taxPercentageLabel.setText("%");
 
         // Setup initial UI state
         statusIndicator.setText("Draft");
         statusIndicator.getStyleClass().add("status-draft");
-
         progressContainer.setVisible(false);
         clearValidationMessages();
 
@@ -133,13 +128,17 @@ public class ProductFormController implements Initializable {
         descriptionArea.textProperty().addListener((obs, oldText, newText) -> {
             int length = newText != null ? newText.length() : 0;
             characterCount.setText(length + " / 500");
-
             if (length > 500) {
                 characterCount.getStyleClass().add("error-text");
             } else {
                 characterCount.getStyleClass().remove("error-text");
             }
         });
+
+        // default tax
+        if (taxPercentageField.getText() == null || taxPercentageField.getText().isBlank()) {
+            taxPercentageField.setText("0.00");
+        }
     }
 
     private void setupIcons() {
@@ -180,36 +179,24 @@ public class ProductFormController implements Initializable {
             validatePriceField(costPriceField, costValidation);
             updateProfitMargin();
         });
-
         basePriceField.textProperty().addListener((obs, oldVal, newVal) -> {
             validatePriceField(basePriceField, baseValidation);
             updateProfitMargin();
         });
-
         taxPercentageField.textProperty().addListener((obs, oldVal, newVal) -> {
             validateTaxField();
             updateProfitMargin();
         });
 
         // Real-time validation
-        codeField.textProperty().addListener((obs, oldVal, newVal) ->
-                validateRequiredField(codeField, codeValidation, "Product code is required"));
-
-        nameField.textProperty().addListener((obs, oldVal, newVal) ->
-                validateRequiredField(nameField, nameValidation, "Product name is required"));
-
-        unitCombo.valueProperty().addListener((obs, oldVal, newVal) ->
-                validateComboField(unitCombo, unitValidation, "Unit selection is required"));
-
-        categoryCombo.valueProperty().addListener((obs, oldVal, newVal) ->
-                validateComboField(categoryCombo, categoryValidation, "Category selection is required"));
+        codeField.textProperty().addListener((obs, oldVal, newVal) -> validateRequiredField(codeField, codeValidation, "Product code is required"));
+        nameField.textProperty().addListener((obs, oldVal, newVal) -> validateRequiredField(nameField, nameValidation, "Product name is required"));
+        unitCombo.valueProperty().addListener((obs, oldVal, newVal) -> validateComboField(unitCombo, unitValidation, "Unit selection is required"));
+        categoryCombo.valueProperty().addListener((obs, oldVal, newVal) -> validateComboField(categoryCombo, categoryValidation, "Category selection is required"));
 
         // Stock validation
-        minStockField.textProperty().addListener((obs, oldVal, newVal) ->
-                validateIntegerField(minStockField, minStockValidation, "Minimum stock must be a valid number"));
-
-        initialStockField.textProperty().addListener((obs, oldVal, newVal) ->
-                validateIntegerField(initialStockField, stockValidation, "Initial stock must be a valid number"));
+        minStockField.textProperty().addListener((obs, oldVal, newVal) -> validateIntegerField(minStockField, minStockValidation, "Minimum stock must be a valid number"));
+        initialStockField.textProperty().addListener((obs, oldVal, newVal) -> validateIntegerField(initialStockField, stockValidation, "Initial stock must be a valid number"));
 
         // Format number fields on focus lost
         setupNumberFieldFormatting();
@@ -219,11 +206,9 @@ public class ProductFormController implements Initializable {
         costPriceField.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (!newVal) formatPriceField(costPriceField);
         });
-
         basePriceField.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (!newVal) formatPriceField(basePriceField);
         });
-
         taxPercentageField.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (!newVal) formatPercentageField(taxPercentageField);
         });
@@ -241,29 +226,14 @@ public class ProductFormController implements Initializable {
 
     private void setupFieldValidationStyling(TextField field) {
         field.textProperty().addListener((obs, oldVal, newVal) -> {
-            if (hasValidationError(field)) {
-                if (!field.getStyleClass().contains("error-field")) {
-                    field.getStyleClass().add("error-field");
-                }
-            } else {
-                field.getStyleClass().remove("error-field");
-            }
+            // This merely toggles a CSS error-class if a validation label is set
+            // actual messages are handled by showFieldError/clearFieldError
+            // Nothing to do here if no label set
         });
     }
 
-    private boolean hasValidationError(TextField field) {
-        // Check if the field has any validation errors based on associated validation label
-        if (field == codeField && !codeValidation.getText().isEmpty()) return true;
-        if (field == nameField && !nameValidation.getText().isEmpty()) return true;
-        if (field == costPriceField && !costValidation.getText().isEmpty()) return true;
-        if (field == basePriceField && !baseValidation.getText().isEmpty()) return true;
-        if (field == minStockField && !minStockValidation.getText().isEmpty()) return true;
-        if (field == initialStockField && !stockValidation.getText().isEmpty()) return true;
-        return false;
-    }
-
     private void setupAnimations() {
-        // Add subtle entrance animations
+        // Add subtle entrance animation
         Timeline fadeIn = new Timeline(
                 new KeyFrame(Duration.ZERO, new KeyValue(formTitle.opacityProperty(), 0)),
                 new KeyFrame(Duration.millis(300), new KeyValue(formTitle.opacityProperty(), 1))
@@ -273,7 +243,6 @@ public class ProductFormController implements Initializable {
 
     public void setProduct(ProductDTO product) {
         this.editingProduct = product;
-
         if (product.getId() != null) {
             formTitle.setText("Edit Product");
             breadcrumbCurrent.setText("Edit Product");
@@ -281,11 +250,9 @@ public class ProductFormController implements Initializable {
             statusIndicator.getStyleClass().removeAll("status-draft", "status-active");
             statusIndicator.getStyleClass().add("status-editing");
         }
-
         // Populate form fields
         populateFormFields(product);
         updateProfitMargin();
-
         log.info("Product form loaded for {}", product.getId() != null ? "editing" : "creation");
     }
 
@@ -297,23 +264,11 @@ public class ProductFormController implements Initializable {
             barcodeField.setText(product.getBarcode());
             unitCombo.setValue(product.getUnit());
             categoryCombo.setValue(product.getCategoryName());
-
-            if (product.getBasePrice() != null) {
-                basePriceField.setText(product.getBasePrice().toString());
-            }
-            if (product.getCostPrice() != null) {
-                costPriceField.setText(product.getCostPrice().toString());
-            }
-            if (product.getTaxPercentage() != null) {
-                taxPercentageField.setText(product.getTaxPercentage().toString());
-            }
-            if (product.getMinStockLevel() != null) {
-                minStockField.setText(product.getMinStockLevel().toString());
-            }
-            if (product.getCurrentStock() != null) {
-                initialStockField.setText(product.getCurrentStock().toString());
-            }
-
+            if (product.getBasePrice() != null) basePriceField.setText(product.getBasePrice().toString());
+            if (product.getCostPrice() != null) costPriceField.setText(product.getCostPrice().toString());
+            if (product.getTaxPercentage() != null) taxPercentageField.setText(product.getTaxPercentage().toString());
+            if (product.getMinStockLevel() != null) minStockField.setText(product.getMinStockLevel().toString());
+            if (product.getCurrentStock() != null) initialStockField.setText(product.getCurrentStock().toString());
             activeCheckBox.setSelected(Boolean.TRUE.equals(product.getIsActive()));
         });
     }
@@ -321,8 +276,13 @@ public class ProductFormController implements Initializable {
     @FXML
     private void handleSave() {
         log.info("Save button clicked");
+        if (!validateForm()) {
+            showValidationSummary();
+            return;
+        }
 
-        if (!validateForm() || !validateBusinessRules()) {
+        // Run business rule validation. This contains local checks only and a synchronous optional uniqueness check.
+        if (!validateBusinessRules()) {
             showValidationSummary();
             return;
         }
@@ -359,61 +319,47 @@ public class ProductFormController implements Initializable {
     }
 
     private Task<Boolean> createSaveTask() {
-        return new Task<Boolean>() {
+        return new Task<>() {
             @Override
             protected Boolean call() throws Exception {
-                updateProgress(-1, -1); // Indeterminate progress
+                // Indeterminate progress
                 updateMessage("Saving product...");
-
-                try {
-                    ProductDTO productDTO = createProductDTO();
-
-                    boolean success = (editingProduct == null)
-                            ? productAPIController.createProduct(productDTO)
-                            : productAPIController.updateProduct(productDTO.getId(), productDTO);
-
-                    if (success) {
-                        updateMessage("Product saved successfully!");
-                        Thread.sleep(500); // Brief pause to show success message
-                    }
-
-                    return success;
-                } catch (Exception e) {
-                    log.error("Error in save task", e);
-                    throw e;
+                ProductDTO productDTO = createProductDTO();
+                boolean success = (editingProduct == null)
+                        ? productAPIController.createProduct(productDTO)
+                        : productAPIController.updateProduct(productDTO.getId(), productDTO);
+                if (success) {
+                    updateMessage("Saved");
+                    Thread.sleep(300); // small pause to allow UX feedback
                 }
+                return success;
             }
         };
     }
 
     private ProductDTO createProductDTO() {
-        ProductDTO productDTO = new ProductDTO();
+        ProductDTO dto = new ProductDTO();
+        if (editingProduct != null) dto.setId(editingProduct.getId());
 
-        if (editingProduct != null) {
-            productDTO.setId(editingProduct.getId());
-        }
-
-        productDTO.setCode(codeField.getText().trim());
-        productDTO.setName(nameField.getText().trim());
-        productDTO.setDescription(descriptionArea.getText().trim());
-        productDTO.setBarcode(barcodeField.getText().trim());
-        productDTO.setUnit(unitCombo.getValue());
-        productDTO.setCategoryName(categoryCombo.getValue());
-        productDTO.setBasePrice(parseDouble(basePriceField.getText()));
-        productDTO.setCostPrice(parseDouble(costPriceField.getText()));
-        productDTO.setTaxPercentage(parseDouble(taxPercentageField.getText()));
-        productDTO.setMinStockLevel(parseInteger(minStockField.getText()));
-        productDTO.setCurrentStock(parseInteger(initialStockField.getText()));
-        productDTO.setIsActive(activeCheckBox.isSelected());
-
-        return productDTO;
+        dto.setCode(codeField.getText().trim());
+        dto.setName(nameField.getText().trim());
+        dto.setDescription(descriptionArea.getText().trim());
+        dto.setBarcode(barcodeField.getText().trim());
+        dto.setUnit(unitCombo.getValue());
+        dto.setCategoryName(categoryCombo.getValue());
+        dto.setBasePrice(parseDouble(basePriceField.getText()));
+        dto.setCostPrice(parseDouble(costPriceField.getText()));
+        dto.setTaxPercentage(parseDouble(taxPercentageField.getText()));
+        dto.setMinStockLevel(parseInteger(minStockField.getText()));
+        dto.setCurrentStock(parseInteger(initialStockField.getText()));
+        dto.setIsActive(activeCheckBox.isSelected());
+        return dto;
     }
 
     private void setUIState(boolean loading) {
         saveButton.setDisable(loading);
         cancelButton.setDisable(loading);
         progressContainer.setVisible(loading);
-
         if (loading) {
             saveProgress.setVisible(true);
             progressLabel.setVisible(true);
@@ -427,13 +373,10 @@ public class ProductFormController implements Initializable {
     @FXML
     private void handleCancel() {
         log.info("Cancel button clicked");
-
         if (hasUnsavedChanges()) {
             showUnsavedChangesDialog();
         } else {
-            if (onSaveCallback != null) {
-                onSaveCallback.accept(null);
-            }
+            if (onSaveCallback != null) onSaveCallback.accept(null);
         }
     }
 
@@ -451,12 +394,9 @@ public class ProductFormController implements Initializable {
             if (cost != null && base != null && cost > 0 && base > 0) {
                 double profit = base - cost;
                 double marginPercent = (profit / cost) * 100;
-
-                String profitText = "₹" + currencyFormat.format(profit) +
-                        " (" + percentFormat.format(marginPercent) + "%)";
+                String profitText = "₹" + currencyFormat.format(profit) + " (" + percentFormat.format(marginPercent) + "%)";
                 profitMarginLabel.setText(profitText);
 
-                // Update profit indicator
                 if (marginPercent > 0) {
                     profitIndicator.setText("+" + percentFormat.format(marginPercent) + "%");
                     profitIndicator.getStyleClass().removeAll("profit-negative", "profit-zero");
@@ -482,20 +422,85 @@ public class ProductFormController implements Initializable {
         }
     }
 
-    // Validation Methods
+    // ---------------- Validation Methods ----------------
+
     private boolean validateForm() {
         boolean isValid = true;
-
         clearValidationMessages();
-
         isValid &= validateRequiredField(codeField, codeValidation, "Product code is required");
         isValid &= validateRequiredField(nameField, nameValidation, "Product name is required");
         isValid &= validateComboField(unitCombo, unitValidation, "Unit selection is required");
         isValid &= validatePriceField(costPriceField, costValidation);
         isValid &= validatePriceField(basePriceField, baseValidation);
         isValid &= validateIntegerField(minStockField, minStockValidation, "Minimum stock must be a valid number");
-
         return isValid;
+    }
+
+    /**
+     * Business rules validations (local checks + optional synchronous uniqueness check).
+     * Returns true if all business rules pass.
+     * <p>
+     * NOTE: uniqueness check uses productAPIController.getProductByCode(...) synchronously.
+     * If you prefer non-blocking behavior, move the uniqueness check into an async task.
+     */
+    private boolean validateBusinessRules() {
+        boolean valid = true;
+
+        // 1) Selling price must be greater than cost price
+        Double cost = parseDouble(costPriceField.getText());
+        Double selling = parseDouble(basePriceField.getText());
+        if (cost != null && selling != null && selling <= cost) {
+            showFieldError(baseValidation, "Selling price should be higher than cost price");
+            valid = false;
+        } else {
+            clearFieldError(baseValidation);
+        }
+
+        // 2) Product code length requirement
+        String code = codeField.getText() != null ? codeField.getText().trim() : "";
+        if (!code.isEmpty() && code.length() < 3) {
+            showFieldError(codeValidation, "Product code should be at least 3 characters long");
+            valid = false;
+        } else {
+            // only clear if no other message
+            if (codeValidation != null && codeValidation.getText().contains("Product code")) {
+                clearFieldError(codeValidation);
+            }
+        }
+
+        // 3) Reasonable minimum stock
+        Integer minStock = parseInteger(minStockField.getText());
+        if (minStock != null && minStock > 10000) {
+            showFieldError(minStockValidation, "Minimum stock level seems unusually high");
+            valid = false;
+        } else {
+            clearFieldError(minStockValidation);
+        }
+
+        // 4) (Optional) Unique product code check using API
+        // If code is provided, ensure it isn't used by another product.
+        if (!code.isEmpty()) {
+            try {
+                ProductDTO existing = productAPIController.getProductByCode(code);
+                if (existing != null) {
+                    Long existingId = existing.getId();
+                    Long editingId = editingProduct != null ? editingProduct.getId() : null;
+
+                    if (existingId != null && !existingId.equals(editingId)) {
+                        showFieldError(codeValidation, "Product code already exists");
+                        valid = false;
+                    } else {
+                        clearFieldError(codeValidation);
+                    }
+                }
+            } catch (Exception e) {
+                // API check failed — log and don't block user (optional policy)
+                log.warn("Failed to check uniqueness of product code '{}': {}", code, e.getMessage());
+                // Don't flip valid -> false here; treat as non-fatal
+            }
+        }
+
+        return valid;
     }
 
     private boolean validateRequiredField(TextField field, Label validationLabel, String message) {
@@ -522,9 +527,8 @@ public class ProductFormController implements Initializable {
             showFieldError(validationLabel, "Price is required");
             return false;
         }
-
         try {
-            double value = Double.parseDouble(text.trim());
+            double value = Double.parseDouble(text.trim().replaceAll("[^0-9.]", ""));
             if (value < 0) {
                 showFieldError(validationLabel, "Price cannot be negative");
                 return false;
@@ -533,7 +537,6 @@ public class ProductFormController implements Initializable {
             showFieldError(validationLabel, "Please enter a valid price");
             return false;
         }
-
         clearFieldError(validationLabel);
         return true;
     }
@@ -562,22 +565,25 @@ public class ProductFormController implements Initializable {
             try {
                 double value = Double.parseDouble(text.trim());
                 if (value < 0 || value > 100) {
-                    // Could add validation for tax range if needed
+                    // optionally show a warning
+                     showFieldError(taxValidationLabel, "Tax must be between 0 and 100");
                 }
-            } catch (NumberFormatException e) {
-                // Handle invalid tax percentage
-            }
+            } catch (NumberFormatException ignored) { }
         }
     }
 
     private void showFieldError(Label validationLabel, String message) {
-        validationLabel.setText(message);
-        validationLabel.setVisible(true);
+        if (validationLabel != null) {
+            validationLabel.setText(message);
+            validationLabel.setVisible(true);
+        }
     }
 
     private void clearFieldError(Label validationLabel) {
-        validationLabel.setText("");
-        validationLabel.setVisible(false);
+        if (validationLabel != null) {
+            validationLabel.setText("");
+            validationLabel.setVisible(false);
+        }
     }
 
     private void clearValidationMessages() {
@@ -585,15 +591,12 @@ public class ProductFormController implements Initializable {
                 codeValidation, nameValidation, categoryValidation, unitValidation,
                 costValidation, baseValidation, minStockValidation, stockValidation
         };
-
         for (Label label : validationLabels) {
-            if (label != null) {
-                clearFieldError(label);
-            }
+            if (label != null) clearFieldError(label);
         }
     }
 
-    // Formatting Methods
+    // ---------------- Formatting Methods ----------------
     private void formatPriceField(TextField field) {
         try {
             Double value = parseDouble(field.getText());
@@ -616,11 +619,10 @@ public class ProductFormController implements Initializable {
         }
     }
 
-    // Utility Methods
+    // ---------------- Utility ----------------
     private Double parseDouble(String value) {
         if (value == null || value.trim().isEmpty()) return null;
         try {
-            // Remove currency symbols and commas for parsing
             String cleanValue = value.trim().replaceAll("[^0-9.]", "");
             return Double.parseDouble(cleanValue);
         } catch (NumberFormatException e) {
@@ -639,17 +641,14 @@ public class ProductFormController implements Initializable {
 
     private boolean hasUnsavedChanges() {
         if (editingProduct == null) {
-            return !codeField.getText().trim().isEmpty() ||
-                    !nameField.getText().trim().isEmpty() ||
-                    !descriptionArea.getText().trim().isEmpty();
+            return !codeField.getText().trim().isEmpty() || !nameField.getText().trim().isEmpty() || !descriptionArea.getText().trim().isEmpty();
         }
-
         return !codeField.getText().trim().equals(editingProduct.getCode()) ||
                 !nameField.getText().trim().equals(editingProduct.getName()) ||
                 !descriptionArea.getText().trim().equals(editingProduct.getDescription()) ||
                 !barcodeField.getText().trim().equals(editingProduct.getBarcode()) ||
-                !unitCombo.getValue().equals(editingProduct.getUnit()) ||
-                !categoryCombo.getValue().equals(editingProduct.getCategoryName()) ||
+                !Objects.equals(unitCombo.getValue(), editingProduct.getUnit()) ||
+                !Objects.equals(categoryCombo.getValue(), editingProduct.getCategoryName()) ||
                 !Objects.equals(parseDouble(costPriceField.getText()), editingProduct.getCostPrice()) ||
                 !Objects.equals(parseDouble(basePriceField.getText()), editingProduct.getBasePrice()) ||
                 !Objects.equals(parseDouble(taxPercentageField.getText()), editingProduct.getTaxPercentage()) ||
@@ -658,8 +657,7 @@ public class ProductFormController implements Initializable {
                 activeCheckBox.isSelected() != Boolean.TRUE.equals(editingProduct.getIsActive());
     }
 
-
-    // Dialog Methods
+    // ---------------- Dialog / Notifications ----------------
     private void showValidationSummary() {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle("Validation Error");
@@ -673,7 +671,6 @@ public class ProductFormController implements Initializable {
         alert.setTitle("Unsaved Changes");
         alert.setHeaderText("You have unsaved changes.");
         alert.setContentText("Do you want to discard your changes?");
-
         alert.showAndWait().ifPresent(result -> {
             if (result == ButtonType.OK) {
                 if (onSaveCallback != null) {
@@ -684,12 +681,10 @@ public class ProductFormController implements Initializable {
     }
 
     private void showSuccessMessage() {
-        // Create a subtle success notification
         statusIndicator.setText("Saved");
         statusIndicator.getStyleClass().removeAll("status-draft", "status-editing");
         statusIndicator.getStyleClass().add("status-saved");
 
-        // Auto-hide success message after 3 seconds
         Timeline hideSuccess = new Timeline(
                 new KeyFrame(Duration.seconds(3), e -> {
                     statusIndicator.setText(editingProduct != null ? "Active" : "Draft");
@@ -698,10 +693,7 @@ public class ProductFormController implements Initializable {
                 })
         );
         hideSuccess.play();
-
-        log.info("Product {} successfully {}",
-                codeField.getText(),
-                editingProduct == null ? "created" : "updated");
+        log.info("Product {} successfully {}", codeField.getText(), editingProduct == null ? "created" : "updated");
     }
 
     private void showErrorMessage(String message) {
@@ -709,24 +701,18 @@ public class ProductFormController implements Initializable {
         alert.setTitle("Save Error");
         alert.setHeaderText("Failed to save product");
         alert.setContentText(message);
-
-        // Style the alert dialog
-        alert.getDialogPane().getStylesheets().add(
-                getClass().getResource("/styles/modern-alerts.css").toExternalForm()
-        );
-
+        // optional: style the alert
         alert.showAndWait();
         log.error("Save error: {}", message);
     }
 
-    // Public methods for external interaction
+    // ---------------- Public helpers ----------------
     public void focusFirstField() {
         Platform.runLater(() -> codeField.requestFocus());
     }
 
     public void resetForm() {
         Platform.runLater(() -> {
-            // Clear all fields
             codeField.clear();
             nameField.clear();
             descriptionArea.clear();
@@ -739,20 +725,14 @@ public class ProductFormController implements Initializable {
             minStockField.setText("0");
             initialStockField.setText("0");
             activeCheckBox.setSelected(true);
-
-            // Clear validations
             clearValidationMessages();
-
-            // Reset UI state
             formTitle.setText("Add New Product");
             breadcrumbCurrent.setText("Add Product");
             statusIndicator.setText("Draft");
             statusIndicator.getStyleClass().removeAll("status-editing", "status-saved", "status-active");
             statusIndicator.getStyleClass().add("status-draft");
-
             updateProfitMargin();
             editingProduct = null;
-
             log.info("Form reset to initial state");
         });
     }
@@ -761,9 +741,8 @@ public class ProductFormController implements Initializable {
         return hasUnsavedChanges();
     }
 
-    // Animation helper methods
+    // Animation helpers
     private void animateFieldError(TextField field) {
-        // Subtle shake animation for validation errors
         Timeline shake = new Timeline(
                 new KeyFrame(Duration.ZERO, new KeyValue(field.translateXProperty(), 0)),
                 new KeyFrame(Duration.millis(50), new KeyValue(field.translateXProperty(), -3)),
@@ -775,7 +754,6 @@ public class ProductFormController implements Initializable {
     }
 
     private void animateSuccessSave() {
-        // Pulse animation for successful save
         ScaleTransition pulse = new ScaleTransition(Duration.millis(150), saveButton);
         pulse.setToX(1.1);
         pulse.setToY(1.1);
@@ -787,59 +765,22 @@ public class ProductFormController implements Initializable {
     // Accessibility methods
     public void setAccessibilityMode(boolean enabled) {
         if (enabled) {
-            // Enhance for screen readers and keyboard navigation
             codeField.setAccessibleText("Product code input field, required");
             nameField.setAccessibleText("Product name input field, required");
             costPriceField.setAccessibleText("Cost price input field, required, enter amount in rupees");
             basePriceField.setAccessibleText("Selling price input field, required, enter amount in rupees");
-
-            // Add more accessible descriptions
             unitCombo.setAccessibleText("Unit of measurement selection, required");
             categoryCombo.setAccessibleText("Product category selection");
             activeCheckBox.setAccessibleText("Product active status checkbox");
-
             log.info("Accessibility mode enabled");
         }
     }
 
-    // Data validation methods for complex business rules
-    private boolean validateBusinessRules() {
-        boolean isValid = true;
-
-        // Business rule: Selling price should be higher than cost price
-        Double cost = parseDouble(costPriceField.getText());
-        Double selling = parseDouble(basePriceField.getText());
-
-        if (cost != null && selling != null && selling <= cost) {
-            showFieldError(baseValidation, "Selling price should be higher than cost price");
-            isValid = false;
-        }
-
-        // Business rule: Product code should be unique (would need API call to verify)
-        String code = codeField.getText().trim();
-        if (!code.isEmpty() && code.length() < 3) {
-            showFieldError(codeValidation, "Product code should be at least 3 characters long");
-            isValid = false;
-        }
-
-        // Business rule: Minimum stock should be reasonable
-        Integer minStock = parseInteger(minStockField.getText());
-        if (minStock != null && minStock > 10000) {
-            showFieldError(minStockValidation, "Minimum stock level seems unusually high");
-            isValid = false;
-        }
-
-        return isValid;
-    }
-
-    // Auto-save functionality (optional)
+    // Auto-save (optional)
     private Timeline autoSaveTimeline;
-
     public void enableAutoSave(boolean enabled) {
         if (enabled && autoSaveTimeline == null) {
-            autoSaveTimeline = new Timeline(
-                    new KeyFrame(Duration.seconds(30), e -> autoSaveDraft())
-            );
+            autoSaveTimeline = new Timeline(new KeyFrame(Duration.seconds(30), e -> autoSaveDraft()));
             autoSaveTimeline.setCycleCount(Timeline.INDEFINITE);
             autoSaveTimeline.play();
             log.info("Auto-save enabled (every 30 seconds)");
@@ -852,17 +793,13 @@ public class ProductFormController implements Initializable {
 
     private void autoSaveDraft() {
         if (hasUnsavedChanges() && validateForm()) {
-            // Save as draft - implementation would depend on your backend API
             log.debug("Auto-saving draft...");
-            // This would typically save to a drafts table or local storage
+            // Implement draft save if backend supports drafts
         }
     }
 
-    // Cleanup method
     public void cleanup() {
-        if (autoSaveTimeline != null) {
-            autoSaveTimeline.stop();
-        }
+        if (autoSaveTimeline != null) autoSaveTimeline.stop();
         log.info("ProductFormController cleanup completed");
     }
 }
